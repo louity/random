@@ -4,3 +4,5 @@
 **/*.swo
 **/*.pyc
 src/data/*
+rapport/rapport.log
+
