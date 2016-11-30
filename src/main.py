@@ -12,6 +12,7 @@ from sklearn.preprocessing import Imputer
 import plotUtils
 import nearestNeighbors
 import preprocessing
+import verification
 
 # lire les données
 X_train = pd.read_csv('data/X_train.csv')
@@ -22,11 +23,10 @@ X_test = pd.read_csv('data/X_test.csv')
 XY_train = pd.concat([X_train, Y_train['TARGET']], axis=1)
 
 # repérer les noms des différents polluants
-pollutant_train_datas = preprocessing.separatePollutantDatas(XY_train)
-pollutant_test_datas = preprocessing.separatePollutantDatas(X_test)
+pollutant_train_datas = preprocessing.separatePollutantDatas(XY_train, True)
+pollutant_test_datas = preprocessing.separatePollutantDatas(X_test, True)
 
 # methode plus proche voisin polluant par polluant
-
 n_neighbors = 4
 Y_test = pd.DataFrame();
 
