@@ -24,7 +24,7 @@ def separatePollutantDatas(data, shouldFillNaN=False):
 
 def separateStationDatas(data, shouldFillNaN=False):
     station_ids = set(data['station_id'])
-    stationDatas = {}
+    station_datas = {}
 
     fill_NaN = Imputer(missing_values=np.nan)
 
@@ -39,9 +39,19 @@ def separateStationDatas(data, shouldFillNaN=False):
             station_data = station_data_fill
         #station_values = station_values.sort_values('daytime', ascending=True, axis=1)
 
-        stationDatas[station_id] = station_data
+        station_datas[station_id] = station_data
 
-    return stationDatas
+    return station_datas
+
+def separateZoneDatas(data):
+    zone_ids = set(data['zone_id'])
+    zone_datas = {}
+
+    for i, zone_id in enumerate(zone_ids):
+        zone_data = data.loc[data['zone_id'] == zone_id].reset_index(drop=True).dropna(axis=1, how='all')
+        zone_datas[zone_id] = zone_data
+
+    return zone_datas
 
 def separatePollutantAndStationData(data):
     pollutant_datas = separatePollutantDatas(data)
@@ -50,3 +60,20 @@ def separatePollutantAndStationData(data):
         pollutant_datas[key] = separateStationDatas(pollutant_datas[key])
 
     return pollutant_datas;
+
+def separateZoneAndStationDatas(data):
+    zone_datas = separateZoneDatas(data)
+
+    for zone_id_key in zone_datas:
+        zone_datas[zone_id_key] = separateStationDatas(zone_datas[zone_id_key])
+
+    return zone_datas
+
+def separateZoneStationAndPollutantDatas(data):
+    zone_station_datas = separateZoneAndStationDatas(data)
+
+    for zone_id_key in zone_station_datas:
+        for station_id_key in zone_station_datas[zone_id_key]:
+            zone_station_datas[zone_id_key][station_id_key] = separatePollutantDatas(zone_station_datas[zone_id_key][station_id_key])
+
+    return zone_station_datas
