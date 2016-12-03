@@ -3,6 +3,15 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import Imputer
 
+def separateDataByValues(data, column_label):
+    columns_values = set(data[column_label])
+    separated_datas = {}
+
+    for i, value in enumerate(columns_values):
+        value_data = data.loc[data[column_label] == value].reset_index(drop=True).drop(column_label, axis=1)
+        separated_datas[value] = value_data
+
+    return separated_datas
 
 def separatePollutantDatas(data, shouldFillNaN=False):
     pollutants = set(data['pollutant'])
@@ -53,11 +62,11 @@ def separateZoneDatas(data):
 
     return zone_datas
 
-def separatePollutantAndStationData(data):
-    pollutant_datas = separatePollutantDatas(data)
+def separatePollutantAndZoneDatas(data, shouldFillNaN=False):
+    pollutant_datas = separatePollutantDatas(data, shouldFillNaN)
 
     for key in pollutant_datas:
-        pollutant_datas[key] = separateStationDatas(pollutant_datas[key])
+        pollutant_datas[key] = separateZoneDatas(pollutant_datas[key])
 
     return pollutant_datas;
 
