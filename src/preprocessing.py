@@ -2,6 +2,26 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import Imputer
+import math
+
+def addTemporalValues(data):
+    daytimeToHour = lambda x: x % 24
+    daytimeToDay = lambda x: math.floor(x / 24)
+    daytimeToWeek = lambda x: math.floor(x / (24 * 7))
+    daytimeToMonth = lambda x: math.floor(x / (24 * 7 * 4))
+
+    daytime = data['daytime']
+
+    hour = pd.DataFrame(daytime.apply(daytimeToHour))
+    hour.columns = ['hour']
+    day = pd.DataFrame(daytime.apply(daytimeToDay))
+    day.columns = ['day']
+    week = pd.DataFrame(daytime.apply(daytimeToWeek))
+    week.columns = ['week']
+    month = pd.DataFrame(daytime.apply(daytimeToMonth))
+    month.columns = ['month']
+
+    return pd.concat([data.drop('daytime', axis=1), hour, day, week, month], axis=1)
 
 def separateDataByValues(data, column_label):
     columns_values = set(data[column_label])
@@ -61,6 +81,14 @@ def separateZoneDatas(data):
         zone_datas[zone_id] = zone_data
 
     return zone_datas
+
+def separatePollutantZoneAndDaytimeDatas(data, shouldFillNaN=False):
+    pollutant_zone_datas = separatePollutantAndZoneDatas(data, shouldFillNaN)
+
+    for pollutant_key in pollutant_zone_datas:
+        for zone_key in pollutant_zone_datas[pollutant_key]:
+            pollutant_zone_datas[pollutant_key][zone_key] = separateDataByValues(pollutant_zone_datas[pollutant_key][zone_key], 'daytime')
+    return pollutant_zone_datas;
 
 def separatePollutantAndZoneDatas(data, shouldFillNaN=False):
     pollutant_datas = separatePollutantDatas(data, shouldFillNaN)
