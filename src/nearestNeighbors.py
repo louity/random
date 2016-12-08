@@ -55,3 +55,25 @@ def nearest_neighbors_by_pollutant_and_zone(train_data=loadData.XY_train, test_d
         print 'done'
     filename = 'data/Y_test_' + str(n_neighbors) + 'nn_by_pollutant_and_zone.csv'
     Y_test.to_csv(filename, index=False)
+
+def nearest_neighbors_by_pollutant_zone_and_daytime(train_data=loadData.XY_train, test_data=loadData.X_test):
+    pollutant_zone_daytime_train_datas = preprocessing.separatePollutantZoneAndDaytimeDatas(train_data, True)
+    pollutant_zone_daytime_test_datas = preprocessing.separatePollutantZoneAndDaytimeDatas(test_data, True)
+    n_neighbors = 4
+    Y_test = pd.DataFrame();
+
+    for pollutant_key in pollutant_zone_daytime_train_datas:
+        zone_daytime_train_datas = pollutant_zone_daytime_train_datas[pollutant_key]
+        zone_daytime_test_datas = pollutant_zone_daytime_test_datas[pollutant_key]
+        for zone_id_key in zone_daytime_train_datas:
+            print 'nearest neighbors for ', pollutant_key , ' in zone ', zone_id_key, '...'
+            daytime_train_datas = zone_daytime_train_datas[zone_id_key]
+            daytime_test_datas = zone_daytime_test_datas[zone_id_key]
+            for daytime_key in daytime_train_datas:
+                train = daytime_train_datas[daytime_key]
+                test = daytime_test_datas[daytime_key]
+                Y_test_pollutant_zone_daytime = nearest_neighbors(train, test, n_neighbors)
+                Y_test = pd.concat([Y_test, Y_test_pollutant_zone_daytime])
+            print 'done'
+    filename = 'data/Y_test_' + str(n_neighbors) + 'nn_by_pollutant_zone_and_daytime.csv'
+    Y_test.to_csv(filename, index=False)
