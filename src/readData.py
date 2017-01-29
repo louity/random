@@ -1,9 +1,23 @@
 # coding: utf8
+import pandas as pd
+# coding: utf8
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import Imputer
 import math
+import timeit
 
+idInfoNames = ['ID', 'zone_id', 'station_id', 'pollutant']
+statiqueNames = ['hlres_50', 'green_5000', 'hldres_50', 'route_100', 'hlres_1000',
+   'route_1000', 'roadinvdist', 'port_5000', 'hldres_100', 'natural_5000',
+   'hlres_300', 'hldres_300', 'route_300', 'route_500', 'hlres_500', 'hlres_100',
+   'industry_1000',  'hldres_500', 'hldres_1000']
+dynamiqueNames = ['temperature', 'precipprobability', 'precipintensity',
+   'windbearingcos','windbearingsin', 'windspeed','cloudcover',  'pressure', 'daytime', 'is_calmday']
+
+
+
+#Ajoute des données temporelles aux données
 def addTemporalValues(data):
     daytimeToHour = lambda x: x % 24
     daytimeToDay = lambda x: math.floor(x / 24)
@@ -23,6 +37,7 @@ def addTemporalValues(data):
 
     return pd.concat([data.drop('daytime', axis=1), hour, day, week, month], axis=1)
 
+#Separe les donnees par valeur, pour pouvoir regarder
 def separateDataByValues(data, column_label):
     columns_values = set(data[column_label])
     separated_datas = {}
@@ -33,6 +48,7 @@ def separateDataByValues(data, column_label):
 
     return separated_datas
 
+#Regarde les polluants
 def separatePollutantDatas(data, shouldFillNaN=False):
     pollutants = set(data['pollutant'])
     pollutantDatas = {}
@@ -51,6 +67,7 @@ def separatePollutantDatas(data, shouldFillNaN=False):
 
     return pollutantDatas
 
+#Separe les stations
 def separateStationDatas(data, shouldFillNaN=False):
     station_ids = set(data['station_id'])
     station_datas = {}
@@ -72,6 +89,7 @@ def separateStationDatas(data, shouldFillNaN=False):
 
     return station_datas
 
+#Separe les zones
 def separateZoneDatas(data):
     zone_ids = set(data['zone_id'])
     zone_datas = {}
@@ -114,3 +132,109 @@ def separateZoneStationAndPollutantDatas(data):
             zone_station_datas[zone_id_key][station_id_key] = separatePollutantDatas(zone_station_datas[zone_id_key][station_id_key])
 
     return zone_station_datas
+
+#Load les donnes
+def loadTrainData(hierarchie = True):
+    # lire les données
+    X_train = pd.read_csv('data/X_train.csv')
+    Y_train = pd.read_csv('data/Y_train.csv')
+
+    #Hierarchise les labels des colonnes pour pouvoir separer statique/dynamique facilement
+    if(hierarchie == True):
+        X_train = setColNames(X_train);
+
+    return X_train, Y_train
+
+def loadTestData(hierarchie = True):
+    X_test = pd.read_csv('data/X_test.csv')
+
+    #Hierarchise les labels des colonnes pour pouvoir separer statique/dynamique facilement
+    if(hierarchie == True):
+        X_test = setColNames(X_test);
+
+    return X_test;
+
+#Hierarchise les colonnes pour separer statique dynamique et info
+def setColNames(data):
+    idInfo = data[idInfoNames];
+    statique = data[statiqueNames];
+    dynamique = data[dynamiqueNames];
+
+    dict = {'IdInfo' : idInfo, 'statique' : statique, 'dynamique' : dynamique}
+    newData = pd.concat(dict.values(), axis = 1, keys = dict.keys());
+
+    return newData;
+
+#Renvoie toute les données sur la station
+def getCity(data, city):
+    return data[data.zone_id == city];
+
+def getStation(data, station):
+    return data[data.station_id == station];
+
+#get the wanted lines with this pollutant. The possible values are : 'PM10', 'NO2'
+def getPollutant(data, pollutant):
+    return data['pollutant' == pollutant];
+
+#Recenter
+def recenter(data):
+    for column in data.columns:
+        if(column != 'pollutant'):
+            data[column]= data[column]-np.mean(data[column]);
+
+#Normalise les donnees
+def normalise(data):
+    print('1')
+    for column in data.columns:
+        print('2')
+        m = np.max(data[column]) - np.min(data[column]);
+        data[column] = data[column].apply(lambda x: x/m);
+
+#Ne garde que les données statistiques
+def getStatiques(data):
+    return data[statiqueNames];
+
+#Ne garde que les doonees dynamiques
+def getDynamiques(data):
+    return data[dynamiqueNames];
+
+#Return an array which can directly be sent to the learning algorithm.
+def getLearningData(data, unusedVariables = [], statiques = True, dynamiques = True):
+    """ Return an array which can directly be sent to the learning algorithm
+    Parameters :
+        unusedVariables : to choose which column you may not want to use
+        statiques/dynamiques : if you want these kind of varaibles
+    """
+
+    d = data.copy();
+    if(statiques == False):
+        d.drop(statiqueNames, axis = 1, inplace = True)
+    if(dynamiques == False):
+        d.drop(dynamiqueNames, axis = 1, inplace = True)
+
+    toDrop = ['ID', 'zone_id', 'station_id', 'pollutant'];
+
+    d.drop(unusedVariables, axis = 1, inplace = True);
+    d.drop(toDrop, axis = 1, inplace = True);
+
+    return d.as_matrix();
+
+#test de la lecture si ce fichier est executé en tant que main
+if __name__ == "__main__":
+
+    df = pd.DataFrame(np.random.randn(3,3), index = ['a', 'b', 'c'], columns = ['c1', 'c2', 'c3']);
+    print(df);
+    print(df[['c1']]);
+    tuples = [('1', 'c1'), ('1', 'c3'), ('2', 'c2')];
+    index = pd.MultiIndex.from_tuples(tuples);
+    print(df.as_matrix())
+
+    X,Y = loadTrainData(False);
+    X = getStation(X, 16)
+    print(getLearningData(X, statiques = False))
+
+    # Xstation1 = getStation(X, 1);
+    #print(Xstation1);
+
+
+    # Xstation1 = recenter(Xstation1);
