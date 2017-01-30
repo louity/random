@@ -15,11 +15,11 @@ params = {'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
 p1 = ensemble.GradientBoostingRegressor(**params)
 p2 = ensemble.GradientBoostingRegressor(**params)
 
-xTrain, yTrain = loadTrainData();
+data = loadTrainData();
 
-xp1 = getPollutant(xTrain, 'NO2');
-xp1 = getLearningData(xp1);
+datap1 = getPollutant(data, 'NO2');
+xp1, yp1 = getLearningData(data, statiques = False);
 
-p1.fit(xTrain, yTrain)
-mse = mean_squared_error(y_test, clf.predict(X_test))
+p1.fit(xp1, yp1);
+mse = score_function(yp1, p1.predict(xp1))
 print("MSE: %.4f" % mse)

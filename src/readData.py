@@ -134,34 +134,32 @@ def separateZoneStationAndPollutantDatas(data):
     return zone_station_datas
 
 #Load les donnes
-def loadTrainData(hierarchie = True):
+def loadTrainData():
     # lire les données
     X_train = pd.read_csv('data/X_train.csv')
     Y_train = pd.read_csv('data/Y_train.csv')
 
     #Hierarchise les labels des colonnes pour pouvoir separer statique/dynamique facilement
-    if(hierarchie == True):
-        X_train = setColNames(X_train);
+    data = mergeXY(X_train, Y_train);
 
-    return X_train, Y_train
+    return data
 
-def loadTestData(hierarchie = True):
+def loadTestData():
     X_test = pd.read_csv('data/X_test.csv')
-
-    #Hierarchise les labels des colonnes pour pouvoir separer statique/dynamique facilement
-    if(hierarchie == True):
-        X_test = setColNames(X_test);
 
     return X_test;
 
-#Hierarchise les colonnes pour separer statique dynamique et info
-def setColNames(data):
-    idInfo = data[idInfoNames];
-    statique = data[statiqueNames];
-    dynamique = data[dynamiqueNames];
+#Fusionne les donnes x et y
+def mergeXY(x, y):
+    idInfo = x[idInfoNames];
+    statique = x[statiqueNames];
+    dynamique = x[dynamiqueNames];
 
-    dict = {'IdInfo' : idInfo, 'statique' : statique, 'dynamique' : dynamique}
-    newData = pd.concat(dict.values(), axis = 1, keys = dict.keys());
+    y.drop('ID', axis = 1, inplace = True);
+    y.columns  = ['y'];
+
+    dict = {'IdInfo' : idInfo, 'statique' : statique, 'dynamique' : dynamique, 'y' : y}
+    newData = pd.concat(dict.values(), axis = 1);
 
     return newData;
 
@@ -174,7 +172,7 @@ def getStation(data, station):
 
 #get the wanted lines with this pollutant. The possible values are : 'PM10', 'NO2'
 def getPollutant(data, pollutant):
-    return data['pollutant' == pollutant];
+    return data.loc[data['pollutant'] == pollutant];
 
 #Recenter
 def recenter(data):
@@ -190,7 +188,7 @@ def normalise(data):
         m = np.max(data[column]) - np.min(data[column]);
         data[column] = data[column].apply(lambda x: x/m);
 
-#Ne garde que les données statistiques
+#Ne garde que les données statistiques, suppose que la df a soit 2 level d'index, soit 1.
 def getStatiques(data):
     return data[statiqueNames];
 
@@ -200,24 +198,26 @@ def getDynamiques(data):
 
 #Return an array which can directly be sent to the learning algorithm.
 def getLearningData(data, unusedVariables = [], statiques = True, dynamiques = True):
-    """ Return an array which can directly be sent to the learning algorithm
+    """ Return an array which can directly be sent to the learning algorithm. Remove the column not appropriate
+    to the learning process : ID, zone_id, station_id and pollutant
     Parameters :
         unusedVariables : to choose which column you may not want to use
         statiques/dynamiques : if you want these kind of varaibles
     """
 
+    y = data['y'];
     d = data.copy();
     if(statiques == False):
-        d.drop(statiqueNames, axis = 1, inplace = True)
+        d.drop(statiqueNames, axis = 1, inplace = True, errors = 'ignore')
     if(dynamiques == False):
-        d.drop(dynamiqueNames, axis = 1, inplace = True)
+        d.drop(dynamiqueNames, axis = 1, inplace = True, errors = 'ignore')
 
-    toDrop = ['ID', 'zone_id', 'station_id', 'pollutant'];
+    toDrop = ['ID', 'zone_id', 'station_id', 'pollutant', 'y'];
 
-    d.drop(unusedVariables, axis = 1, inplace = True);
-    d.drop(toDrop, axis = 1, inplace = True);
+    d.drop(unusedVariables, axis = 1, inplace = True, errors = 'ignore');
+    d.drop(toDrop, axis = 1, inplace = True, errors = 'ignore');
 
-    return d.as_matrix();
+    return d.as_matrix(), y.as_matrix();
 
 #test de la lecture si ce fichier est executé en tant que main
 if __name__ == "__main__":
@@ -229,9 +229,21 @@ if __name__ == "__main__":
     index = pd.MultiIndex.from_tuples(tuples);
     print(df.as_matrix())
 
-    X,Y = loadTrainData(False);
-    X = getStation(X, 16)
-    print(getLearningData(X, statiques = False))
+    data = loadTrainData();
+    d = getPollutant(data, 'NO2')
+    print(d['pollutant'])
+    #print(getStatiques(data));
+    #print(getDynamiques(data));
+    x, y = getLearningData(data)
+    print(x.shape)
+    print(y.shape)
+
+    testData = loadTestData();
+    print(testData.shape)
+
+    # X.drop('ID', axis = 1, inplace = True, level = 1)
+    #X = getStation(X, 16)
+    # print(getLearningData(X, statiques = False))
 
     # Xstation1 = getStation(X, 1);
     #print(Xstation1);
