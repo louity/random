@@ -14,7 +14,16 @@ statiqueNames = ['hlres_50', 'green_5000', 'hldres_50', 'route_100', 'hlres_1000
    'industry_1000',  'hldres_500', 'hldres_1000']
 dynamiqueNames = ['temperature', 'precipprobability', 'precipintensity',
    'windbearingcos','windbearingsin', 'windspeed','cloudcover',  'pressure', 'daytime', 'is_calmday']
-
+hlres = ['hlres_50', 'hlres_100', 'hlres_1000', 'hlres_300', 'hlres_500', 'station_id']
+hldres = ['hldres_50', 'hldres_100', 'hldres_300', 'hldres_500', 'hldres_1000', 'station_id']
+green = ['green_5000', 'station_id']
+natural = ['natural_5000', 'station_id']
+route = ['route_300', 'route_500', 'route_100', 'route_1000', 'station_id']
+port = [ 'port_5000', 'station_id']
+roadinv = [ 'roadinvdist', 'station_id']
+industry = ['industry_1000', 'station_id']
+station_idTrain = [16,17,20,1,18,22,26,28,6,9,25,4,10,23,5,8,11]
+zone_id = [0, 1, 2, 3, 4, 5]
 
 
 #Ajoute des données temporelles aux données
@@ -170,9 +179,13 @@ def getCity(data, city):
 def getStation(data, station):
     return data[data.station_id == station];
 
-#get the wanted lines with this pollutant. The possible values are : 'PM10', 'NO2'
+#get the wanted lines with this pollutant. The possible values are : 'PM10', 'NO2' et 'PM2_5'
 def getPollutant(data, pollutant):
     return data.loc[data['pollutant'] == pollutant];
+
+#Return the list of the indices of the input lines which correspond to the given pollutant
+def getIdPollutant(data, pollutant):
+    return data['ID'].loc[data['pollutant'] == pollutant].index;
 
 #Recenter
 def recenter(data):
@@ -205,7 +218,10 @@ def getLearningData(data, unusedVariables = [], statiques = True, dynamiques = T
         statiques/dynamiques : if you want these kind of varaibles
     """
 
-    y = data['y'];
+    if('y' in data):
+        y = data['y'].as_matrix();
+    else:
+        y = None;
     d = data.copy();
     if(statiques == False):
         d.drop(statiqueNames, axis = 1, inplace = True, errors = 'ignore')
@@ -217,29 +233,27 @@ def getLearningData(data, unusedVariables = [], statiques = True, dynamiques = T
     d.drop(unusedVariables, axis = 1, inplace = True, errors = 'ignore');
     d.drop(toDrop, axis = 1, inplace = True, errors = 'ignore');
 
-    return d.as_matrix(), y.as_matrix();
+    return d.as_matrix(), y;
+
+def arrayToResult(y, testData):
+    ids = pd.Series(testData['ID'].as_matrix())
+    ys = pd.Series(y)
+
+    return pd.concat([ids, ys], keys = ['ID', 'TARGET'], axis = 1)
 
 #test de la lecture si ce fichier est executé en tant que main
 if __name__ == "__main__":
 
-    df = pd.DataFrame(np.random.randn(3,3), index = ['a', 'b', 'c'], columns = ['c1', 'c2', 'c3']);
-    print(df);
-    print(df[['c1']]);
-    tuples = [('1', 'c1'), ('1', 'c3'), ('2', 'c2')];
-    index = pd.MultiIndex.from_tuples(tuples);
-    print(df.as_matrix())
 
-    data = loadTrainData();
-    d = getPollutant(data, 'NO2')
-    print(d['pollutant'])
-    #print(getStatiques(data));
-    #print(getDynamiques(data));
-    x, y = getLearningData(data)
-    print(x.shape)
-    print(y.shape)
+    dataTrain = loadTrainData();
 
-    testData = loadTestData();
-    print(testData.shape)
+    for i in station_idTrain:
+        data = dataTrain[dataTrain['station_id'] == i]
+        data.drop_duplicates(subset = 'daytime', inplace = True)
+        data = data['daytime'];
+        dt = data.as_matrix();
+        print(min(dt), max(dt), len(dt));
+
 
     # X.drop('ID', axis = 1, inplace = True, level = 1)
     #X = getStation(X, 16)
