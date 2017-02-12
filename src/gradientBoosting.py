@@ -7,13 +7,11 @@ from sklearn import ensemble
 from sklearn import datasets
 from sklearn.utils import shuffle
 from sklearn.metrics import mean_squared_error
+from sklearn.linear_model import LinearRegression
 
 
 params = {'n_estimators': 500, 'max_depth': 4, 'min_samples_split': 2,
           'learning_rate': 0.01, 'loss': 'ls'}
-
-data = loadTrainData();
-y = data['y'].as_matrix();
 
 def predict(dataTrain, dataTest):
     xno2Train, yno2Train = getLearningData(getPollutant(dataTrain, 'NO2'), statiques = False);
@@ -56,21 +54,64 @@ def predict(dataTrain, dataTest):
 
     return arrayToResult(yTest, dataTest);
 
+def predictWithLinearRegression(dataTrain, dataTest, apply_log=False):
+    xno2Train, yno2Train = getLearningData(getPollutant(dataTrain, 'NO2'), statiques = False, return_type='dataframe');
+    xpm10Train, ypm10Train = getLearningData(getPollutant(dataTrain, 'PM10'), statiques = False, return_type='dataframe');
+    xpm2_5Train, ypm2_5Train = getLearningData(getPollutant(dataTrain, 'PM2_5'), statiques = False, return_type='dataframe');
 
-#dataTrain = loadTrainData(); dataTest = loadTestData()
+    if apply_log:
+        yno2Train = yno2Train.apply(np.log)
+        ypm10Train = ypm10Train.apply(np.log);
+        ypm2_5Train = ypm2_5Train.apply(np.log);
+
+    #Training of the gradient boosting
+    pno2 = LinearRegression()
+    ppm10 = LinearRegression()
+    ppm2_5 = LinearRegression()
+
+    pno2.fit(xno2Train, yno2Train);
+    ppm10.fit(xpm10Train, ypm10Train);
+    ppm2_5.fit(xpm2_5Train, ypm2_5Train);
+
+
+    #Testing part
+    xno2Test, yno2Test = getLearningData(getPollutant(dataTest, 'NO2'), statiques = False, return_type='dataframe');
+    xpm10Test, ypm10Test = getLearningData(getPollutant(dataTest, 'PM10'), statiques = False, return_type='dataframe');
+    xpm2_5Test, ypm2_5Test = getLearningData(getPollutant(dataTest, 'PM2_5'), statiques = False, return_type='dataframe');
+
+    if yno2Test is not None and ypm10Test is not None and ypm2_5Test is not None :
+        yTestTrue = pd.concat([yno2Test, ypm10Test, ypm2_5Test], axis=0).sort_index()
+    else:
+        yTestTrue = None
+
+    yno2TestPredict = pd.DataFrame(np.exp(pno2.predict(xno2Test)));
+    yno2TestPredict.index = xno2Test.index;
+    ypm10TestPredict = pd.DataFrame(np.exp(ppm10.predict(xpm10Test)));
+    ypm10TestPredict.index = xpm10Test.index
+    ypm2_5TestPredict = pd.DataFrame(np.exp(ppm2_5.predict(xpm2_5Test)));
+    ypm2_5TestPredict.index = xpm2_5Test.index;
+
+    yTestPredict = pd.concat([yno2TestPredict, ypm10TestPredict, ypm2_5TestPredict], axis=0)
+
+    return yTestPredict, yTestTrue
+
 
 data = loadTrainData();
 
 stationTest = [4, 10, 22];
 
-dataTest = data[data['station_id'].isin(stationTest)];
-dataTest.reset_index(drop = True, inplace = True)
-dataTrain = data[~data['station_id'].isin(stationTest)];
-y = dataTest['y'].as_matrix()
+#dataTest = data[data['station_id'].isin(stationTest)];
+#dataTrain = data[~data['station_id'].isin(stationTest)];
 
-result = predict(dataTrain, dataTest);
 
-yPredicted = result['TARGET'].as_matrix();
+dataTrain = loadTrainData()
+dataTest = loadTestData()
 
-mse = score_function(y, yPredicted)
-print("MSE: %.4f" % mse)
+#result = predict(dataTrain, dataTest);
+
+yTestPredicted, yTestTrue = predictWithLinearRegression(dataTrain, dataTest, apply_log=True);
+
+#yPredicted = result['TARGET'].as_matrix();
+
+#mse = score_function(yTestPredicted.values, yTestTrue.values)
+#print("MSE: %.4f" % mse)
