@@ -1,3 +1,40 @@
 \section{Les données à notre disposition}
 
-On décrit très rapidement les données qu'on a à disposition et on les étudie (visualisation, PCA...)
+Les données du problème concernent les contentrations de trois types de polluants ($NO2$, $PM_{10}$, $PM_{2,5}$) sur une période temps donnée dans six villes inconnues, numérotées de 0 à 5.
+Chaque ville comporte 4 ou 5 stations (29 au total sur les six villes, numérotées de 1 à 29).
+
+Pour chacune des stations, nous avons les variables explicatives suivantes:
+\begin{itemize}
+  \item des variables statiques, qui nous renseignent sur l'entourage du point où les mesures sur faites:
+  \begin{itemize}
+    \item la surface cumulée de zone résidentielle à faible densité dans un rayon de 25/50/150/250/500 mètres autour du point
+    \item la surface cumulée de zone résidentielle à haute densité dans un rayon de 25/50/150/250/500 mètres autour du point
+    \item la surface cumulée de zone industrielles dans un rayon de 500 mètres autour du point
+    \item la surface cumulée de zone portuaires dans un rayon de 2500 mètres autour du point
+    \item la surface cumulée d'espaces verts dans un rayon de 2500 mètres autour du point
+    \item la distance cumulée de routes verts dans un rayon de 50/150/250/500 mètres autour du point
+    \item l'inverse de la distance à la route la plus proche
+  \end{itemize}
+  \item des variables dynamiques, dont on a les valeurs sur pratiquement tout la periode de temps, à intervalle d'une heure:
+  \begin{itemize}
+    \item La température
+    \item La vitesse du vent
+    \item l'orientation du vent, via la valeur du cosinus et du sinus de l'angle par rapport à une référence inconnue
+    \item cloudcover (double)
+    \item l'intensité des précipisations
+    \item la probabilité de précipitations
+    \item la pression
+  \end{itemize}
+\end{itemize}
+
+Comme données d'entrainement, nous avons les concentrations en polluants à intervalle de une heure sur toute la période pour 2 ou 3 stations par ville (17 sur 29 au total).
+Pour les 12 autre stations (2 par ville), nous n'avons \textbf{aucune} valeur de concentration en polluants.
+Le but est de prédire la concentration en polluant sur ces 12 stations sur sur tout la période donnée.
+
+Le problème est donc un problème de régression très général, et nous avons très peu d'exemples (2 ou 3 par ville).
+
+Quelques remarques sur les données:
+\begin{itemize}
+  \item Nous n'avons aucune donnée géographique qui nous renseigne sur la position relative des différents points les uns par rapport aux autre, ni sur la position relative des éléments (par exemples les routes) qui sont dans l'entourage du point auquel est fait la mesure.
+\end{itemize}
+
