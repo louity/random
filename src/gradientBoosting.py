@@ -255,32 +255,36 @@ def predictNO2(dataTrain, dataTest, result, isTest = False):
 
     return arrayToResult(yTest, dataTest);
 
-def predictNO2Zone2(dataTrain, dataTest, result):
+def predictNO2Zone2(dataTrain, dataTest, result, isTest = False):
     yTest = result['TARGET'].as_matrix();
 
-    datano2 = getPollutant(dataTrain, 'NO2')
+    datano2 = getZone(dataTrain, 2);
+    datano2 = getPollutant(datano2, 'NO2')
     datano2Train, yno2Train = getLearningPollutantData(datano2, 'NO2');
     xno2Train = datano2Train.as_matrix();
     names = datano2Train.columns;
 
-    print("Predicting NO2 : {0} data".format(len(xno2Train)))
+    print("Predicting NO2 Zone 2 : {0} data".format(len(xno2Train)))
 
     #Training of the gradient boosting
     pno2 = ensemble.GradientBoostingRegressor(**params)
     pno2.fit(xno2Train, yno2Train);
 
     #Testing part
-    xno2Test, yno2T = getLearningPollutantData(getPollutant(dataTest, 'NO2'), 'NO2');
+    datano2 = getZone(dataTest, 2);
+    xno2Test, yno2T = getLearningPollutantData(getPollutant(datano2, 'NO2'), 'NO2');
+    xno2Test = xno2Test.as_matrix();
 
-    idno2 = getIdPollutant(dataTest, 'NO2');
+    idno2 = getIdPollutant(datano2, 'NO2');
 
     if(len(xno2Test) > 0):
         yno2Test = pno2.predict(xno2Test);
 
     print("mse : {0}".format(score_function(yno2Test, yno2T)))
 
-    plotDeviance(pno2, xno2Test, yno2T, yno2Test);
-    plotFeatureImportance(pno2, names);
+    if(isTest):
+        plotDeviance(pno2, xno2Test, yno2T, yno2Test);
+        plotFeatureImportance(pno2, names);
 
     yTest[idno2] = yno2Test[:];
 
@@ -388,7 +392,7 @@ def tcheat(dataTrain, dataTest, yTest):
     yTest[d['index'].as_matrix()] = d['y'].as_matrix()
     return yTest;
 
-params = {'n_estimators': 100, 'max_depth': 4, 'min_samples_split': 2,
+params = {'n_estimators': 200, 'max_depth': 6, 'min_samples_split': 2,
           'learning_rate': 0.01, 'loss': 'ls'}
 
 TestAlgo = True;  #TestAlgo = False;
@@ -400,18 +404,23 @@ if(not TestAlgo):
     saveResult(result, 'result.csv')
 else:
     data = loadTrainData();
+    recenter(data); normalise(data);
+    #data = getZone(data, 2);
     stationTest = [1, 4, 5, 6, 16, 26];
-    stationTest = [20, 22, 23, 25, 28, 11]
+    #stationTest = [20, 22, 23, 25, 28, 11]
 
     dataTest = data[data['station_id'].isin(stationTest)];
     dataTest.reset_index(drop = True, inplace = True)
     dataTrain = data[~data['station_id'].isin(stationTest)];
     y = dataTest['y'].as_matrix()
     nTest = len(dataTest.index)
+    result = arrayToResult(np.zeros(nTest), dataTest)
 
-    result = predictPollutant(dataTrain, dataTest, plotFeaturesInfluence = True, isTest = True);
+    #dataTest = loadTrainData(); dataTrain = loadTrainData();
+
+    result = predictPollutant(dataTrain, dataTest, plotFeaturesInfluence = False, isTest = True);
     getStatLearningTest(result, dataTest)
-    #result = predictNO2(dataTrain, dataTest, result, isTest = True);
+    result = predictNO2Zone2(dataTrain, dataTest, result, isTest = True);
     getStatLearningTest(result, dataTest)
     plt.show();
 

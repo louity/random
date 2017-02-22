@@ -162,12 +162,21 @@ def loadTrainData():
     data = mergeXY(X_train, Y_train);
     data.sort_index(axis = 1, inplace = True);
 
+    interpoleRouteNan(data);
+    interpoleHldresNan(data);
+    interpoleHlresNan(data);
+    setNaNValuesToZero(data);
+
     return data
 
 def loadTestData():
     X_test = pd.read_csv('data/X_test.csv')
     X_test.sort_index(axis = 1, inplace = True);
 
+    interpoleRouteNan(X_test);
+    interpoleHldresNan(X_test);
+    interpoleHlresNan(X_test);
+    setNaNValuesToZero(X_test);
 
     return X_test;
 
@@ -204,17 +213,28 @@ def getIdPollutant(data, pollutant):
 
 #Recenter not working yet
 def recenter(data):
-    for column in data.columns:
-        if(column != 'pollutant'):
-            data[column]= data[column]-np.mean(data[column]);
+    columnsToRecenter = ['hlres_50', 'green_5000', 'hldres_50', 'route_100', 'hlres_1000',
+       'route_1000', 'roadinvdist', 'port_5000', 'hldres_100', 'natural_5000',
+       'hlres_300', 'hldres_300', 'route_300', 'route_500', 'hlres_500', 'hlres_100',
+       'industry_1000',  'hldres_500', 'hldres_1000', 'temperature', 'precipprobability', 'precipintensity',
+        'windspeed','cloudcover',  'pressure']
+
+    #donnes non recentrees : windbearingcos/sin, daytime, is_calmday
+
+    for column in columnsToRecenter:
+        data[column]= data[column]-np.mean(data[column]);
 
 #Normalise les donnees not working yet
 def normalise(data):
-    print('1')
-    for column in data.columns:
-        print('2')
-        m = np.max(data[column]) - np.min(data[column]);
-        data[column] = data[column].apply(lambda x: x/m);
+    columnsToNormalise = ['hlres_50', 'green_5000', 'hldres_50', 'route_100', 'hlres_1000',
+       'route_1000', 'roadinvdist', 'port_5000', 'hldres_100', 'natural_5000',
+       'hlres_300', 'hldres_300', 'route_300', 'route_500', 'hlres_500', 'hlres_100',
+       'industry_1000',  'hldres_500', 'hldres_1000', 'temperature', 'precipprobability', 'precipintensity',
+        'windspeed','cloudcover',  'pressure']
+    for column in columnsToNormalise:
+        #m = np.var(data[column])
+        m = np.max(data[column]);
+        data[column] = data[column]/m;
 
 #Ne garde que les données statiques, robuste si des colonnes ont deja ete enlevee
 def getStatiques(data):
@@ -311,10 +331,10 @@ def getLearningPollutantData(data, p, removeThings = False):
 
     d = data.copy()
 
-    interpoleRouteNan(d);
-    interpoleHldresNan(d);
-    interpoleHlresNan(d);
-    setNaNValuesToZero(d);
+    # interpoleRouteNan(d);
+    # interpoleHldresNan(d);
+    # interpoleHlresNan(d);
+    # setNaNValuesToZero(d);
 
     if(removeThings):
         #Present dans toute les zones -> zones 0, 4, 5 (car marche mieux dans predictZones)
@@ -507,9 +527,12 @@ def printTimeInfluence(data, stations = station_idTest+station_idTrain):
         if(dt.size > 0):
             print(i, min(dt), max(dt), len(dt));
 
-#used to make info data.txt
+#used to make info data.txt, station = -1 print all the information
 def printStationParameters(data, station):
-    d = data[data['station_id'] == station].drop_duplicates(subset = 'station_id')
+    if(station == -1):
+        d = data.drop_duplicates(subset = 'station_id')
+    else:
+        d = data[data['station_id'] == station].drop_duplicates(subset = 'station_id')
     print(getStatiques(d))
 
 #save the result
@@ -520,11 +543,11 @@ def saveResult(result, name = "Y_test.csv"):
 if __name__ == "__main__":
 
 
-    data = loadTestData();
-    print(data.iloc[0])
-    data = loadTrainData();
-    print(data.iloc[0]);
 
+    data = loadTrainData();
+    recenter(data);
+    normalise(data);
+    printStationParameters(data, -1)
 
     #print(data)
 

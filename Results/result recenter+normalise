@@ -1,0 +1,30 @@
+[Command: python -u 'D:\alexandre\MVA\Data Challenge\random\src\gradientBoosting.py']
+Predicting NO2 : 138954 data
+[ 14.08521513  19.43868017  21.29829324 ...,  12.71280307  12.09392977
+  10.88018406]
+mse : 491.1507967370396
+Predicting PM10 : 119268 data
+[ 22.33134282  21.34226383  23.76814115 ...,  23.97653103  24.12829651
+  25.27260058]
+mse : 128.66234116204558
+Predicting PM2_5 : 23906 data
+[ 10.35646813  10.99265182  10.57980116 ...,   7.4905194    7.50080054
+   7.71044309]
+mse : 44.61739607864308
+ Zone 0 : pollutant NO2 -> mse = 268.2688846683908, PM10 -> mse = 172.45004611805183,
+ Zone 1 : pollutant NO2 -> mse = 834.4946360709753, PM2_5 -> mse = 50.05959019124939,
+ Zone 2 : pollutant NO2 -> mse = 154.00475324177884, PM10 -> mse = 88.8929284634583, PM2_5 -> mse = 39.077769329967865,
+ Zone 3 : pollutant NO2 -> mse = 1049.8807311396379, PM10 -> mse = 192.87747534019397,
+ Zone 4 : pollutant NO2 -> mse = 135.34314864802934, PM10 -> mse = 78.81798031571513,
+ Zone 5 : pollutant PM10 -> mse = 110.16655236492728,
+Global MSE : 266.578520807474
+Predicting NO2 Zone 2 : 13573 data
+mse : 352.27371052581236
+ Zone 0 : pollutant NO2 -> mse = 268.2688846683908, PM10 -> mse = 172.45004611805183,
+ Zone 1 : pollutant NO2 -> mse = 834.4946360709753, PM2_5 -> mse = 50.05959019124939,
+ Zone 2 : pollutant NO2 -> mse = 352.27371052581236, PM10 -> mse = 88.8929284634583, PM2_5 -> mse = 39.077769329967865,
+ Zone 3 : pollutant NO2 -> mse = 1049.8807311396379, PM10 -> mse = 192.87747534019397,
+ Zone 4 : pollutant NO2 -> mse = 135.34314864802934, PM10 -> mse = 78.81798031571513,
+ Zone 5 : pollutant PM10 -> mse = 110.16655236492728,
+Global MSE : 282.7859909938507
+[Finished in 216.723s]
