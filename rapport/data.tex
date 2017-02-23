@@ -1,7 +1,9 @@
 \section{Les données à notre disposition}
 
-Les données du problème concernent les contentrations de trois types de polluants ($NO2$, $PM_{10}$, $PM_{2,5}$) sur une période temps donnée dans six villes inconnues, numérotées de 0 à 5.
+Les données du problème concernent les contentrations de trois types de polluants ($NO_2$, $PM_{10}$, $PM_{2,5}$) sur une période temps donnée dans six villes inconnues, numérotées de 0 à 5.
 Chaque ville comporte 4 ou 5 stations (29 au total sur les six villes, numérotées de 1 à 29).
+
+\subsection{Variables explicatives}
 
 Pour chacune des stations, nous avons les variables explicatives suivantes:
 \begin{itemize}
@@ -12,7 +14,7 @@ Pour chacune des stations, nous avons les variables explicatives suivantes:
     \item la surface cumulée de zone industrielles dans un rayon de 500 mètres autour du point
     \item la surface cumulée de zone portuaires dans un rayon de 2500 mètres autour du point
     \item la surface cumulée d'espaces verts dans un rayon de 2500 mètres autour du point
-    \item la distance cumulée de routes verts dans un rayon de 50/150/250/500 mètres autour du point
+    \item la distance cumulée de routes dans un rayon de 50/150/250/500 mètres autour du point
     \item l'inverse de la distance à la route la plus proche
   \end{itemize}
   \item des variables dynamiques, dont on a les valeurs sur pratiquement tout la periode de temps, à intervalle d'une heure:
@@ -27,14 +29,28 @@ Pour chacune des stations, nous avons les variables explicatives suivantes:
   \end{itemize}
 \end{itemize}
 
+\subsection{Données d'entrainement}
+
 Comme données d'entrainement, nous avons les concentrations en polluants à intervalle de une heure sur toute la période pour 2 ou 3 stations par ville (17 sur 29 au total).
 Pour les 12 autre stations (2 par ville), nous n'avons \textbf{aucune} valeur de concentration en polluants.
+
+\subsection{Problème posé}
+
 Le but est de prédire la concentration en polluant sur ces 12 stations sur sur tout la période donnée.
 
-Le problème est donc un problème de régression très général, et nous avons très peu d'exemples (2 ou 3 par ville).
+Le problème est donc un problème de régression très général : étant données les variables explicatives et l'évolution temporelle des concentration en polluants à certain points sur une période T, prédire l'évolution temporelle des concentration en d'autre points à partir des données météorologiques et statiques.
+Pour ce faire, nous n'avons que très peu d'exemples (2 ou 3 par ville), bien que la période T soit longue.
+La tâche s'annonce donc compliquée.
 
+\subsection{Remarques sur les données}
 Quelques remarques sur les données:
 \begin{itemize}
-  \item Nous n'avons aucune donnée géographique qui nous renseigne sur la position relative des différents points les uns par rapport aux autre, ni sur la position relative des éléments (par exemples les routes) qui sont dans l'entourage du point auquel est fait la mesure.
+  \item
+    Nous n'avons aucune donnée géographique qui nous renseigne sur la position relative des différents points les uns par rapport aux autre, ni sur la position relative des éléments (par exemples les routes) qui sont dans l'entourage du point auquel est fait la mesure.
+  \item
+    A une heure donnée, les données dynamiques sont les mêmes pour toutes les stations d'une zone (voir script verification.py).
+  \item
+   Les données statiques nous sytématiquement répétées pour chaque valeur temporelle d'un polluant.
 \end{itemize}
 
+\subsection{Exploration des valeurs}
