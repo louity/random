@@ -1,28 +1,28 @@
 \section{Les données à notre disposition}
 
-Les données du problème concernent les contentrations de trois types de polluants ($NO_2$, $PM_{10}$, $PM_{2,5}$) sur une période temps donnée dans six villes inconnues, numérotées de 0 à 5.
+Les données du problème concernent les contentrations de trois types de polluants ($NO_2$, $PM_{10}$, $PM_{2,5}$) sur une période de temps T donnée dans six villes inconnues, numérotées de 0 à 5.
 Chaque ville comporte 4 ou 5 stations (29 au total sur les six villes, numérotées de 1 à 29).
 
 \subsection{Variables explicatives}
 
 Pour chacune des stations, nous avons les variables explicatives suivantes:
 \begin{itemize}
-  \item 18 variables statiques, qui nous renseignent sur l'entourage du point où les mesures sur faites:
+  \item 18 variables statiques, qui nous renseignent sur l'entourage du point où les mesures sont faites:
   \begin{itemize}
-    \item la surface cumulée de zone résidentielle à faible densité dans un rayon de 25/50/150/250/500 mètres autour du point
-    \item la surface cumulée de zone résidentielle à haute densité dans un rayon de 25/50/150/250/500 mètres autour du point
-    \item la surface cumulée de zone industrielles dans un rayon de 500 mètres autour du point
-    \item la surface cumulée de zone portuaires dans un rayon de 2500 mètres autour du point
+    \item la surface cumulée de zones résidentielles à faible densité dans un rayon de 25/50/150/250/500 mètres autour du point
+    \item la surface cumulée de zones résidentielles à haute densité dans un rayon de 25/50/150/250/500 mètres autour du point
+    \item la surface cumulée de zones industrielles dans un rayon de 500 mètres autour du point
+    \item la surface cumulée de zones portuaires dans un rayon de 2500 mètres autour du point
     \item la surface cumulée d'espaces verts dans un rayon de 2500 mètres autour du point
     \item la distance cumulée de routes dans un rayon de 50/150/250/500 mètres autour du point
     \item l'inverse de la distance à la route la plus proche
   \end{itemize}
-  \item 9 variables dynamiques, dont on a les valeurs sur pratiquement tout la periode de temps, à intervalle d'une heure:
+  \item 9 variables dynamiques, dont on a les valeurs sur pratiquement toute la periode T, à intervalles de temps d'une heure:
   \begin{itemize}
     \item La température
     \item La vitesse du vent
     \item l'orientation du vent, via la valeur du cosinus et du sinus de l'angle par rapport à une référence inconnue
-    \item cloudcover (double)
+    \item l'ennuagement
     \item l'intensité des précipisations
     \item la probabilité de précipitations
     \item la pression
@@ -32,12 +32,12 @@ Pour chacune des stations, nous avons les variables explicatives suivantes:
 
 \subsection{Données d'entrainement}
 
-Comme données d'entrainement, nous avons les concentrations en polluants à intervalle de une heure sur toute la période pour 2 ou 3 stations par ville (17 sur 29 au total).
+Comme données d'entrainement, nous avons les concentrations en polluants à intervalle de temps d'une heure sur toute la période pour 2 ou 3 stations par ville (17 sur 29 au total).
 Pour les 12 autre stations (2 par ville), nous n'avons \textbf{aucune} valeur de concentration en polluants.
 
 \subsection{Problème posé}
 
-Le but est de prédire la concentration en polluant sur ces 12 stations sur sur tout la période donnée.
+Le but est de prédire la concentration en polluant sur ces 12 stations sur sur tout la période T donnée.
 
 Le problème est donc un problème de régression très général : étant données les variables explicatives et l'évolution temporelle des concentration en polluants à certain points sur une période T, prédire l'évolution temporelle des concentration en d'autre points à partir des données météorologiques et statiques.
 Pour ce faire, nous n'avons que très peu d'exemples (2 ou 3 par ville), bien que la période T soit longue.
@@ -54,7 +54,7 @@ Quelques remarques sur les données:
     \includegraphics[height=8cm]{images/pollution_gothenburg.png}
     \end{center}
     On constate que la pollution est phénomène spatial, et on peut sans aucun doute trouver des points qui auront les même valeurs statiques (surfaces cumulées) et pour lesquels le niveau de pollution est pourtant très différent.
-    Notons au passage que les routes sont classés selon différents types qui semblent être déterminant pour la pollution en $NO_2$, or nous n'avons qu'un type de route à notre disposition
+    Notons au passage que les routes sont classés selon différents types qui semblent être déterminants pour la pollution en $NO_2$, or nous n'avons qu'un type de route à notre disposition
   \item
     A une heure donnée, les données météorologique (température, vent, pression, ennuagement) sont les mêmes pour toutes les stations d'une zone.
     Ce sont donc uniquement les données statiques qui différencient les stations les unes des autres.
@@ -137,4 +137,3 @@ Dans la mesure ou nous cherchons à appliques des techniques de régression simp
 \subsubsection{Les données statiques}
 
 On a seulement 29 jeux de données statiques (1 par station), on pourrait les afficher dans un tableau, mais cela manque d'intérêt.
-
