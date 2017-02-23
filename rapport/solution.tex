@@ -1,0 +1,50 @@
+\section{Solutions}
+
+\subsection{Plus proche voisins}
+
+On commence par implémenter une methode des K plus proches voisins sur les données brutes séparées polluant par polluant.
+On fait plusieurs essais et voici ce qu'on obtient :
+
+\begin{tabular}{|c|c|c|}
+  \hline
+  score & methode & K \\
+  \hline
+  597.379 &  par polluant & K = 5\\
+  \hline
+  617.229 & par polluant & K = 3\\
+  \hline
+  613.892 & par polluant  & K = 4\\
+  \hline
+  613.892 & par polluant et par zone & K = 4\\
+  \hline
+\end{tabular}
+
+Etonnament, le fait de faire la méthode par polluant et par zone ne change pas le résultat.
+De plus, on n'est pas très loin du score du benchmark proposé par Plume Labs (501)
+
+\subsection{Méthode triviales}
+
+On essaie ensuite trois méthodes triviales:
+\begin{itemize}
+  \item
+    On met la valeur zéro pour toutes les prédictions: le score de 800.000 environ.
+    Cela nous donne un ordre de grandeur sur les score: toute méthode donnant un score supérieur à 800.000 n'est vraiment pas adaptée.
+  \item
+    On met une valeur constante pour chaque polluant égale à la moyenne de toutes les valeurs pour ce polluant: on obtient une score de 350.000 environ.
+    C'est nettement mieux que le benchmark de Plume Labs.
+    Il est donc probable que leur solution overfitte les données d'entrainement.
+  \item
+    On calcule la valeur moyenne pour chaque polluant à chaque instant donné: on obtient un score de 440.000 environ.
+    Cette méthode n'apporte rien par rapport à la valeur moyenne
+\end{itemize}
+
+\subsection{Regression linéaire}
+
+On teste un modèle linéaire sur les données.
+Puisque le modèle linéaire contient les fonctions constantes, a priori, le score devrait être au pire de l'ordre de la valeur obtenue en mettant la moyenne, c'est à dire 350.000.
+Etonnament, on obtient un score de 430.000.
+Cela veut dire qu'avec une classe de fonction aussi simple que les fonctions linéaires, on overfitte déjà sur les données d'entrainement.
+Mais ce n'est pas tellement étonnant; en effet, nous n'avons que 29 jeu de données statiques alors que ces données vivent dans un espace de dimension 18.
+Quelque soit la méthode employée, à moins d'avoir de la chance, on ne peut pas espérer obtenir une bonne prédiction.
+
+\subsection{Gradient boosting}

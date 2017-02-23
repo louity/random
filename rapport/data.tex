@@ -7,7 +7,7 @@ Chaque ville comporte 4 ou 5 stations (29 au total sur les six villes, numérot�
 
 Pour chacune des stations, nous avons les variables explicatives suivantes:
 \begin{itemize}
-  \item des variables statiques, qui nous renseignent sur l'entourage du point où les mesures sur faites:
+  \item 18 variables statiques, qui nous renseignent sur l'entourage du point où les mesures sur faites:
   \begin{itemize}
     \item la surface cumulée de zone résidentielle à faible densité dans un rayon de 25/50/150/250/500 mètres autour du point
     \item la surface cumulée de zone résidentielle à haute densité dans un rayon de 25/50/150/250/500 mètres autour du point
@@ -17,7 +17,7 @@ Pour chacune des stations, nous avons les variables explicatives suivantes:
     \item la distance cumulée de routes dans un rayon de 50/150/250/500 mètres autour du point
     \item l'inverse de la distance à la route la plus proche
   \end{itemize}
-  \item des variables dynamiques, dont on a les valeurs sur pratiquement tout la periode de temps, à intervalle d'une heure:
+  \item 9 variables dynamiques, dont on a les valeurs sur pratiquement tout la periode de temps, à intervalle d'une heure:
   \begin{itemize}
     \item La température
     \item La vitesse du vent
@@ -26,6 +26,7 @@ Pour chacune des stations, nous avons les variables explicatives suivantes:
     \item l'intensité des précipisations
     \item la probabilité de précipitations
     \item la pression
+    \item une variable booléenne qui indique si le jour est calme ou non
   \end{itemize}
 \end{itemize}
 
@@ -47,10 +48,93 @@ Quelques remarques sur les données:
 \begin{itemize}
   \item
     Nous n'avons aucune donnée géographique qui nous renseigne sur la position relative des différents points les uns par rapport aux autre, ni sur la position relative des éléments (par exemples les routes) qui sont dans l'entourage du point auquel est fait la mesure.
+    Nous ne pouvons donc pas espérer avoir de résultats précis.
+    Prenons par exemple la carte de pollution de la ville Gothenburg qui est prise en exemple dans l'article \cite{}:
+    \begin{center}
+    \includegraphics[height=8cm]{images/pollution_gothenburg.png}
+    \end{center}
+    On constate que la pollution est phénomène spatial, et on peut sans aucun doute trouver des points qui auront les même valeurs statiques (surfaces cumulées) et pour lesquels le niveau de pollution est pourtant très différent.
+    Notons au passage que les routes sont classés selon différents types qui semblent être déterminant pour la pollution en $NO_2$, or nous n'avons qu'un type de route à notre disposition
   \item
-    A une heure donnée, les données dynamiques sont les mêmes pour toutes les stations d'une zone (voir script verification.py).
+    A une heure donnée, les données météorologique (température, vent, pression, ennuagement) sont les mêmes pour toutes les stations d'une zone.
+    Ce sont donc uniquement les données statiques qui différencient les stations les unes des autres.
   \item
-   Les données statiques nous sytématiquement répétées pour chaque valeur temporelle d'un polluant.
+    L'angle d'orientation du vent nous est donnée par son cosinus et son sinus, dont la somme des carrés ne font pas 1 en général (moyenne = 0.995, écart type =  0.06 , maximum =  1.995 , minimum = 2.4 $\cdot 10^{-11}$)
+  \item
+    Les données statiques nous sytématiquement répétées pour chaque valeur temporelle d'un polluant.
+    Nous avons donc fait un script pour vérifier que ce sont effectivement toujours les mêmes pour une station donnée.
 \end{itemize}
 
 \subsection{Exploration des valeurs}
+
+\subsubsection{Les données dynamiques}
+
+Pour se rendre compte de la répartition des valeurs des données dynamiques, on affiche les histogramme de ces valeurs sur une echelle logarithmique:
+
+\begin{figure}[H]
+\captionsetup{labelformat=empty}
+\minipage{0.50\textwidth}
+  \includegraphics[width=\linewidth]{images/pression.png}
+  \caption{pression}
+\endminipage\hfill
+\minipage{0.50\textwidth}
+  \includegraphics[width=\linewidth]{images/log_pression.png}
+  \caption{pression sur échelle log}
+\endminipage\hfill
+\end{figure}
+
+\begin{figure}[H]
+\captionsetup{labelformat=empty}
+\minipage{0.50\textwidth}
+  \includegraphics[width=\linewidth]{images/pression.png}
+  \caption{pression}
+\endminipage\hfill
+\minipage{0.50\textwidth}
+  \includegraphics[width=\linewidth]{images/log_pression.png}
+  \caption{pression sur échelle log}
+\endminipage\hfill
+\end{figure}
+
+\begin{figure}[H]
+\captionsetup{labelformat=empty}
+\minipage{0.50\textwidth}
+  \includegraphics[width=\linewidth]{images/vent.png}
+  \caption{vent}
+\endminipage\hfill
+\minipage{0.50\textwidth}
+  \includegraphics[width=\linewidth]{images/log_vent.png}
+  \caption{vent sur échelle log}
+\endminipage\hfill
+\end{figure}
+
+\begin{figure}[H]
+\captionsetup{labelformat=empty}
+\minipage{0.50\textwidth}
+  \includegraphics[width=\linewidth]{images/ennuagement.png}
+  \caption{ennuagement}
+\endminipage\hfill
+\minipage{0.50\textwidth}
+  \includegraphics[width=\linewidth]{images/log_ennuagement.png}
+  \caption{ennuagement sur échelle log}
+\endminipage\hfill
+\end{figure}
+
+\begin{figure}[H]
+\captionsetup{labelformat=empty}
+\minipage{0.50\textwidth}
+  \includegraphics[width=\linewidth]{images/temperature.png}
+  \caption{temperature}
+\endminipage\hfill
+\minipage{0.50\textwidth}
+  \includegraphics[width=\linewidth]{images/log_temperature.png}
+  \caption{temperature sur échelle log}
+\endminipage\hfill
+\end{figure}
+
+Il apparaît donc que les données sont plus étalées sur un échelles logarithmique.
+Dans la mesure ou nous cherchons à appliques des techniques de régression simples et avec une forte régularité (regression lineaire), le fait d'utiliser des échelles logarithmiques est une première transformation que nous pouvons appliquer à nos données avant d'utiliser des modèles de régression simples.
+
+\subsubsection{Les données statiques}
+
+On a seulement 29 jeux de données statiques (1 par station), on pourrait les afficher dans un tableau, mais cela manque d'intérêt.
+
