@@ -76,16 +76,12 @@ def loadTrainData():
 
 def loadTestData():
     X_test = pd.read_csv('data/X_test.csv')
-<<<<<<< HEAD
     X_test.sort_index(axis = 1, inplace = True);
 
     interpoleRouteNan(X_test);
     interpoleHldresNan(X_test);
     interpoleHlresNan(X_test);
     setNaNValuesToZero(X_test);
-=======
-    X_test.index = X_test['ID'].values
->>>>>>> origin/master
 
     return X_test;
 
@@ -159,13 +155,8 @@ def getDynamiques(data):
 
 """ Get learning data fonction """
 
-<<<<<<< HEAD
 #Return d,y avec d la dataFrame voulue et y les resultats correspondant. Just apply d.as_matrix() to send to the learning algorithm.
 def getLearningData(data, unusedVariables = [], statiques = True, dynamiques = True):
-=======
-#Return an array which can directly be sent to the learning algorithm.
-def getLearningData(data, unusedVariables = [], statiques=True, dynamiques=True, return_type='matrix'):
->>>>>>> origin/master
     """ Return an array which can directly be sent to the learning algorithm. Remove the column not appropriate
     to the learning process : ID, zone_id, station_id and pollutant
     Parameters :
@@ -189,14 +180,7 @@ def getLearningData(data, unusedVariables = [], statiques=True, dynamiques=True,
     d.drop(toDrop, axis = 1, inplace = True, errors = 'ignore');
     d.sort_index()
 
-<<<<<<< HEAD
     return d, y;
-=======
-    if return_type == 'matrix':
-        return d.as_matrix(), y.as_matrix();
-    else:
-        return d, y
->>>>>>> origin/master
 
 #Return d,y avec d la dataFrame voulue et y les resultats correspondant. Just apply d.as_matrix() to send to the learning algorithm.
 def getLearningZoneData(data, z):

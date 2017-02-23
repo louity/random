@@ -19,7 +19,6 @@ def predictDynamique(dataTrain, dataTest):
     dpm2_5Train, ypm2_5Train = getLearningData(getPollutant(dataTrain, 'PM2_5'), statiques = False);
     xpm2_5Train = dpm2_5Train.as_matrix()
 
-<<<<<<< HEAD
     #Training of the gradient boosting
     pno2 = ensemble.GradientBoostingRegressor(**params)
     ppm10 = ensemble.GradientBoostingRegressor(**params)
@@ -180,16 +179,8 @@ def predictZones(dataTrain, dataTest, plotFeaturesInfluence = False):
     return arrayToResult(yTest, dataTest);
 
 def predictGlobal(dataTrain, dataTest):
-
-
-
     xno2Train, yno2Train = getLearningPollutantData(getPollutant(dataTrain, 'NO2'), 'NO2');
     xpm10Train, ypm10Train = getLearningData(getPollutant(dataTrain, 'PM10'), '');
-=======
-def predict(dataTrain, dataTest):
-    xno2Train, yno2Train = getLearningData(getPollutant(dataTrain, 'NO2'), statiques = False);
-    xpm10Train, ypm10Train = getLearningData(getPollutant(dataTrain, 'PM10'), statiques = False);
->>>>>>> origin/master
     xpm2_5Train, ypm2_5Train = getLearningData(getPollutant(dataTrain, 'PM2_5'), statiques = False);
 
     #Training of the gradient boosting
@@ -228,7 +219,6 @@ def predict(dataTrain, dataTest):
 
     return arrayToResult(yTest, dataTest);
 
-<<<<<<< HEAD
 #marche bien sauf pour la zone 2 !!!
 def predictNO2(dataTrain, dataTest, result, isTest = False):
 
@@ -403,19 +393,11 @@ def tcheat(dataTrain, dataTest, yTest):
 params = {'n_estimators': 200, 'max_depth': 6, 'min_samples_split': 2,
           'learning_rate': 0.01, 'loss': 'ls'}
 
-TestAlgo = True;  #TestAlgo = False;
-=======
-def predictWithLinearRegression(dataTrain, dataTest, apply_log=False):
-    xno2Train, yno2Train = getLearningData(getPollutant(dataTrain, 'NO2'), statiques = False, return_type='dataframe');
-    xpm10Train, ypm10Train = getLearningData(getPollutant(dataTrain, 'PM10'), statiques = False, return_type='dataframe');
-    xpm2_5Train, ypm2_5Train = getLearningData(getPollutant(dataTrain, 'PM2_5'), statiques = False, return_type='dataframe');
+def predictWithLinearRegression(dataTrain, dataTest):
+    xno2Train, yno2Train = getLearningData(getPollutant(dataTrain, 'NO2'), statiques = False);
+    xpm10Train, ypm10Train = getLearningData(getPollutant(dataTrain, 'PM10'), statiques = False);
+    xpm2_5Train, ypm2_5Train = getLearningData(getPollutant(dataTrain, 'PM2_5'), statiques = False);
 
-    if apply_log:
-        yno2Train = yno2Train.apply(np.log)
-        ypm10Train = ypm10Train.apply(np.log);
-        ypm2_5Train = ypm2_5Train.apply(np.log);
-
-    #Training of the gradient boosting
     pno2 = LinearRegression()
     ppm10 = LinearRegression()
     ppm2_5 = LinearRegression()
@@ -425,7 +407,6 @@ def predictWithLinearRegression(dataTrain, dataTest, apply_log=False):
     ppm2_5.fit(xpm2_5Train, ypm2_5Train);
 
 
-    #Testing part
     xno2Test, yno2Test = getLearningData(getPollutant(dataTest, 'NO2'), statiques = False, return_type='dataframe');
     xpm10Test, ypm10Test = getLearningData(getPollutant(dataTest, 'PM10'), statiques = False, return_type='dataframe');
     xpm2_5Test, ypm2_5Test = getLearningData(getPollutant(dataTest, 'PM2_5'), statiques = False, return_type='dataframe');
@@ -435,16 +416,19 @@ def predictWithLinearRegression(dataTrain, dataTest, apply_log=False):
     else:
         yTestTrue = None
 
-    yno2TestPredict = pd.DataFrame(np.exp(pno2.predict(xno2Test)));
+    yno2TestPredict = pd.DataFrame(pno2.predict(xno2Test));
     yno2TestPredict.index = xno2Test.index;
-    ypm10TestPredict = pd.DataFrame(np.exp(ppm10.predict(xpm10Test)));
+    ypm10TestPredict = pd.DataFrame(ppm10.predict(xpm10Test));
     ypm10TestPredict.index = xpm10Test.index
-    ypm2_5TestPredict = pd.DataFrame(np.exp(ppm2_5.predict(xpm2_5Test)));
+    ypm2_5TestPredict = pd.DataFrame(ppm2_5.predict(xpm2_5Test));
     ypm2_5TestPredict.index = xpm2_5Test.index;
 
     yTestPredict = pd.concat([yno2TestPredict, ypm10TestPredict, ypm2_5TestPredict], axis=0)
 
-    return yTestPredict, yTestTrue
+    if yTestTrue is None:
+        return yTestPredict
+    else:
+        return yTestPredict, yTestTrue
 
 def predictWithMeanValue(dataTrain, dataTest, apply_log=False):
     means = {
@@ -469,31 +453,90 @@ def predictWithMeanValue(dataTrain, dataTest, apply_log=False):
 
     return yTest, means
 
-def predictWithMeanValue2(dataTrain, dataTest, apply_log=False):
+def predictWithDaytimeMeanValue(dataTrain, dataTest, apply_log=False):
     means = {
         'NO2': np.mean(dataTrain[dataTrain['pollutant'] == 'NO2']['y'].values),
         'PM10': np.mean(dataTrain[dataTrain['pollutant'] == 'PM10']['y'].values),
         'PM2_5': np.mean(dataTrain[dataTrain['pollutant'] == 'PM2_5']['y'].values)
     }
+    sorted_values = {
+        'NO2': dataTrain[dataTrain['pollutant'] == 'NO2'][['daytime', 'y']].sort('daytime').reset_index(),
+        'PM10': dataTrain[dataTrain['pollutant'] == 'PM10'][['daytime', 'y']].sort('daytime').reset_index(),
+        'PM2_5': dataTrain[dataTrain['pollutant'] == 'PM2_5'][['daytime', 'y']].sort('daytime').reset_index()
+    }
+
+    daytime_mean_values = {}
+
+    print 'computing daytime mean value for each pollutant ...'
+
+    for pollutant in sorted_values.keys():
+        pollutant_data = sorted_values[pollutant]
+        daytime_values = pollutant_data['daytime'].values
+        y_values = pollutant_data['y'].values
+
+        N = daytime_values.size
+        i = 0
+        daytimes = []
+        mean_values = []
+
+        while (i < N):
+            daytime = daytime_values[i];
+            mean = y_values[i]
+            j = i+1;
+
+            while (j < N) and (daytime_values[j] == daytime):
+                 mean += y_values[j]
+                 j += 1;
+            mean = mean / (j - i)
+
+            daytimes.append(daytime)
+            mean_values.append(mean)
+
+            i = j
+
+        daytime_mean_values[pollutant] = {'daytime': np.array(daytimes), 'y': np.array(mean_values)}
+
+        print '... done for ', pollutant
 
 
+    print 'testing on test data ...'
+    dataTest = dataTest.sort('daytime')
     index = dataTest.index
+    N_test = len(index)
     yTest = pd.DataFrame(index=index, data=np.zeros_like(index), columns=['TARGET'])
 
+    indices = {
+        'NO2': 0,
+        'PM10': 0,
+        'PM2_5': 0
+    }
+
+    iteration = 0
     for i in index:
+        iteration += 1
+
+        if iteration % 5000 == 0:
+            print (100 * iteration) / N_test , 'percent done'
         pollutant = dataTest.get_value(i, 'pollutant')
         daytime = dataTest.get_value(i, 'daytime')
 
-        daytime_data = dataTrain[dataTrain['pollutant'] == pollutant][dataTrain['daytime'] == daytime]['y']
+        if daytime_mean_values[pollutant]['daytime'][indices[pollutant]] > daytime:
+            mean_value = means[pollutant]
+        elif daytime_mean_values[pollutant]['daytime'][indices[pollutant]] == daytime:
+            mean_value = daytime_mean_values[pollutant]['y'][indices[pollutant]]
 
-        if len(daytime_data) > 0:
-            yTest.set_value(i, 'TARGET', np.mean(daytime_data.values))
-        else:
-            yTest.set_value(i, 'TARGET', means['pollutant'])
+        while daytime_mean_values[pollutant]['daytime'][indices[pollutant]] < daytime:
+            indices[pollutant] += 1
+            if daytime_mean_values[pollutant]['daytime'][indices[pollutant]] > daytime:
+                mean_value = means[pollutant]
+                break;
+            mean_value = daytime_mean_values[pollutant]['y'][indices[pollutant]]
 
-    return yTest, means
+        yTest.set_value(i, 'TARGET', mean_value)
 
->>>>>>> origin/master
+    return yTest
+
+TestAlgo = True;  #TestAlgo = False;
 
 if(not TestAlgo):
     dataTrain = loadTrainData(); dataTest = loadTestData()
@@ -514,7 +557,6 @@ else:
     nTest = len(dataTest.index)
     result = arrayToResult(np.zeros(nTest), dataTest)
 
-<<<<<<< HEAD
     #dataTest = loadTrainData(); dataTrain = loadTrainData();
 
     result = predictPollutant(dataTrain, dataTest, plotFeaturesInfluence = False, isTest = True);
@@ -525,21 +567,3 @@ else:
 
 
     saveResult(result, 'GradientBoostingTest.csv')
-=======
-#dataTest = data[data['station_id'].isin(stationTest)];
-#dataTrain = data[~data['station_id'].isin(stationTest)];
-
-
-dataTrain = loadTrainData()
-dataTest = loadTestData()
-
-#result = predict(dataTrain, dataTest);
-
-#yTestPredicted, yTestTrue = predictWithLinearRegression(dataTrain, dataTest, apply_log=True);
-yTest, means = predictWithMeanValue2(dataTrain, dataTest)
-
-#yPredicted = result['TARGET'].as_matrix();
-
-#mse = score_function(yTestPredicted.values, yTestTrue.values)
-#print("MSE: %.4f" % mse)
->>>>>>> origin/master
