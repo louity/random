@@ -57,6 +57,12 @@ def addTemporalValues(data):
 
 """ Code par alex"""
 
+def apply_log_to_colums(data, columns=['temperature', 'precipprobability', 'precipintensity', 'windspeed', 'cloudcover', 'pressure']):
+    for column in columns:
+        values = data[column].values
+        for i in range(values.size):
+            values[i] = np.log(values[i])
+
 #Load les donnes
 def loadTrainData():
     # lire les données
@@ -156,13 +162,16 @@ def getDynamiques(data):
 """ Get learning data fonction """
 
 #Return d,y avec d la dataFrame voulue et y les resultats correspondant. Just apply d.as_matrix() to send to the learning algorithm.
-def getLearningData(data, unusedVariables = [], statiques = True, dynamiques = True):
+def getLearningData(data, unusedVariables = [], statiques = True, dynamiques = True, apply_log = False):
     """ Return an array which can directly be sent to the learning algorithm. Remove the column not appropriate
     to the learning process : ID, zone_id, station_id and pollutant
     Parameters :
         unusedVariables : to choose which column you may not want to use
         statiques/dynamiques : if you want these kind of varaibles
     """
+
+    if apply_log:
+        apply_log_to_colums(data)
 
     if('y' in data):
         y = data['y'].sort_index();
