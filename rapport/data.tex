@@ -23,7 +23,7 @@ Pour chacune des stations, nous avons les variables explicatives suivantes:
     \item La vitesse du vent
     \item l'orientation du vent, via la valeur du cosinus et du sinus de l'angle par rapport à une référence inconnue
     \item l'ennuagement
-    \item l'intensité des précipisations
+    \item l'intensité des précipitations
     \item la probabilité de précipitations
     \item la pression
     \item une variable booléenne qui indique si le jour est calme ou non
@@ -47,13 +47,21 @@ La tâche s'annonce donc compliquée.
 Quelques remarques sur les données:
 \begin{itemize}
   \item
+    Le comportement physiques des trois polluants est très différent.
+    Les particules $PM_{2,5}$ et $PM_{10}$ ont une taille entre 1 et 10 micromètres, pèsent ...
+    Elle sont solubles dans l'eau; la pluie a donc une très grande influence sur leur concentration dans l'air.
+    Le $NO_2$ est une molécule de taille ..., beaucoup plus petite que les particules, avec une inertie beaucoup plus faible.
+    Elle est de plus bien moins sensible à la pluie que les micro particules.
+    Le comportement des différents pollutants est donc radicalement différent.
+    Cela suggère de traiter différemment les microparticules et le $NO_2$.
+  \item
     Nous n'avons aucune donnée géographique qui nous renseigne sur la position relative des différents points les uns par rapport aux autre, ni sur la position relative des éléments (par exemples les routes) qui sont dans l'entourage du point auquel est fait la mesure.
     Nous ne pouvons donc pas espérer avoir de résultats précis.
-    Prenons par exemple la carte de pollution de la ville Gothenburg qui est prise en exemple dans l'article \cite{}:
+    Prenons par exemple la carte de pollution en $NO_2$ de la ville Gothenburg qui est prise en exemple dans l'article \cite{}:
     \begin{center}
     \includegraphics[height=8cm]{images/pollution_gothenburg.png}
     \end{center}
-    On constate que la pollution est phénomène spatial, et on peut sans aucun doute trouver des points qui auront les même valeurs statiques (surfaces cumulées) et pour lesquels le niveau de pollution est pourtant très différent.
+    On constate que la pollution en $NO_2$ est phénomène spatial, et on peut sans aucun doute trouver des points qui auront les même valeurs statiques (surfaces cumulées) et pour lesquels le niveau de pollution est pourtant très différent.
     Notons au passage que les routes sont classés selon différents types qui semblent être déterminants pour la pollution en $NO_2$, or nous n'avons qu'un type de route à notre disposition
   \item
     A une heure donnée, les données météorologique (température, vent, pression, ennuagement) sont les mêmes pour toutes les stations d'une zone.
@@ -65,75 +73,3 @@ Quelques remarques sur les données:
     Nous avons donc fait un script pour vérifier que ce sont effectivement toujours les mêmes pour une station donnée.
 \end{itemize}
 
-\subsection{Exploration des valeurs}
-
-\subsubsection{Les données dynamiques}
-
-Pour se rendre compte de la répartition des valeurs des données dynamiques, on affiche les histogramme de ces valeurs sur une echelle logarithmique:
-
-\begin{figure}[H]
-\captionsetup{labelformat=empty}
-\minipage{0.50\textwidth}
-  \includegraphics[width=\linewidth]{images/pression.png}
-  \caption{pression}
-\endminipage\hfill
-\minipage{0.50\textwidth}
-  \includegraphics[width=\linewidth]{images/log_pression.png}
-  \caption{pression sur échelle log}
-\endminipage\hfill
-\end{figure}
-
-\begin{figure}[H]
-\captionsetup{labelformat=empty}
-\minipage{0.50\textwidth}
-  \includegraphics[width=\linewidth]{images/pression.png}
-  \caption{pression}
-\endminipage\hfill
-\minipage{0.50\textwidth}
-  \includegraphics[width=\linewidth]{images/log_pression.png}
-  \caption{pression sur échelle log}
-\endminipage\hfill
-\end{figure}
-
-\begin{figure}[H]
-\captionsetup{labelformat=empty}
-\minipage{0.50\textwidth}
-  \includegraphics[width=\linewidth]{images/vent.png}
-  \caption{vent}
-\endminipage\hfill
-\minipage{0.50\textwidth}
-  \includegraphics[width=\linewidth]{images/log_vent.png}
-  \caption{vent sur échelle log}
-\endminipage\hfill
-\end{figure}
-
-\begin{figure}[H]
-\captionsetup{labelformat=empty}
-\minipage{0.50\textwidth}
-  \includegraphics[width=\linewidth]{images/ennuagement.png}
-  \caption{ennuagement}
-\endminipage\hfill
-\minipage{0.50\textwidth}
-  \includegraphics[width=\linewidth]{images/log_ennuagement.png}
-  \caption{ennuagement sur échelle log}
-\endminipage\hfill
-\end{figure}
-
-\begin{figure}[H]
-\captionsetup{labelformat=empty}
-\minipage{0.50\textwidth}
-  \includegraphics[width=\linewidth]{images/temperature.png}
-  \caption{temperature}
-\endminipage\hfill
-\minipage{0.50\textwidth}
-  \includegraphics[width=\linewidth]{images/log_temperature.png}
-  \caption{temperature sur échelle log}
-\endminipage\hfill
-\end{figure}
-
-Il apparaît donc que les données sont plus étalées sur un échelles logarithmique.
-Dans la mesure ou nous cherchons à appliques des techniques de régression simples et avec une forte régularité (regression lineaire), le fait d'utiliser des échelles logarithmiques est une première transformation que nous pouvons appliquer à nos données avant d'utiliser des modèles de régression simples.
-
-\subsubsection{Les données statiques}
-
-On a seulement 29 jeux de données statiques (1 par station), on pourrait les afficher dans un tableau, mais cela manque d'intérêt.

@@ -1,0 +1,16 @@
+\section{Techniques existantes}
+
+Dans la description du challenge, Plume Labs donne les références de deux articles qui décrivent et implémentent un modèle de régression de la pollution.
+Le premier \cite{} traite exclusivement le cas de la pollution en $NO_2$, qui est prédité uniquement à partir de variables statiques.
+Elles sont beaucoup plus précises que celles que nous avons à disposition:
+\begin{itemize}
+  \item 4 types de routes sont distingués
+  \item on a les valeurs u traffic routier moyen dans des zones de différents rayons
+  \item l'altitude est donnée
+  \item les batiments sont classés par taille
+\end{itemize}
+
+De plus, les données d'entrainement sont beaucoup plus conséquentes: pour une seule ville, il y a 25 points pour lequels la pollution est connue et nous n'en avons que 3 par ville.
+
+Le second \cite{} traite exclusivement le cas des particules ultrafines (diamètre inférieur à 0.1 micromètres), auxquelles n'appartiennent pas les particules $PM_{10}$ et $PM_{2.5}$ que nous étudions.
+Cette fois ci, les données sont constittuées de données statiques et de données météorologique, et là encore, les données statiques sont beaucoup plus précises que celles que nous avons.
