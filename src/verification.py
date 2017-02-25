@@ -55,3 +55,14 @@ def checkEqualityOfDynamicValuesInZone(data):
                 n_inequality += 1
 
     print 'equality cases : ', n_equality, ' ; inequality case : ', n_inequality
+
+def checkCosSin(data):
+    cos = data['windbearingcos'].values
+    sin = data['windbearingsin'].values
+
+    cos2 = cos * cos
+    sin2 = sin * sin
+    cos2sin2 = cos2 + sin2
+
+    print 'cos^2 + sin^2 : mean = ', np.mean(cos2sin2), ', std = ', np.std(cos2sin2), ', max = ', np.max(cos2sin2), ', min = ', np.min(cos2sin2)
+
