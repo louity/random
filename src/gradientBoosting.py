@@ -407,9 +407,9 @@ def predictWithLinearRegression(dataTrain, dataTest):
     ppm2_5.fit(xpm2_5Train, ypm2_5Train);
 
 
-    xno2Test, yno2Test = getLearningData(getPollutant(dataTest, 'NO2'), statiques = False, return_type='dataframe');
-    xpm10Test, ypm10Test = getLearningData(getPollutant(dataTest, 'PM10'), statiques = False, return_type='dataframe');
-    xpm2_5Test, ypm2_5Test = getLearningData(getPollutant(dataTest, 'PM2_5'), statiques = False, return_type='dataframe');
+    xno2Test, yno2Test = getLearningData(getPollutant(dataTest, 'NO2'), statiques = False);
+    xpm10Test, ypm10Test = getLearningData(getPollutant(dataTest, 'PM10'), statiques = False);
+    xpm2_5Test, ypm2_5Test = getLearningData(getPollutant(dataTest, 'PM2_5'), statiques = False);
 
     if yno2Test is not None and ypm10Test is not None and ypm2_5Test is not None :
         yTestTrue = pd.concat([yno2Test, ypm10Test, ypm2_5Test], axis=0).sort_index()
