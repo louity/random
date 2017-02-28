@@ -1,5 +1,7 @@
 \section{Solutions}
 
+Comme nous l'avons vu dans la section 1, le principal défi du problème est de réussir à traiter avec le bivalence des données. En outre, 
+
 \subsection{Plus proche voisins}
 
 On commence par implémenter une methode des K plus proches voisins sur les données brutes séparées polluant par polluant.
@@ -20,7 +22,7 @@ On fait plusieurs essais et voici ce qu'on obtient:
 \end{tabular}
 
 Etonnament, le fait de faire la méthode par polluant et par zone ne change pas le résultat.
-De plus, on n'est pas très loin du score du benchmark proposé par Plume Labs (501)
+De plus, on n'est pas très loin du score du benchmark proposé par Plume Labs (501).
 
 \subsection{Méthode triviales}
 
@@ -33,14 +35,32 @@ On essaie ensuite trois méthodes triviales:
     On met une valeur constante pour chaque polluant égale à la moyenne de toutes les valeurs pour ce polluant: on obtient une score de 350 environ.
   \item
     On calcule la valeur moyenne pour chaque polluant à chaque instant donné: on obtient un score de 440.000 environ.
-    Cette méthode n'apporte rien par rapport à la valeur moyenne
+    Cette méthode n'apporte rien par rapport à la valeur moyenne %A commenter
 \end{itemize}
 
-\subsection{Regression linéaire}
+\subsection{Application brut aux données}
+
+\subsubsection{Regression linéaire}
 
 On teste un modèle linéaire sur les données.
-Puisque le modèle linéaire contient les fonctions constantes, a priori, le score devrait être au pire de l'ordre de la valeur obtenue en mettant la moyenne, c'est à dire 350.
-Etonnament, on obtient un score de 430.
-Cela veut dire qu'avec une classe de fonction aussi simple que les fonctions linéaires, on overfitte déjà sur les données d'entrainement.
+Puisque le modèle linéaire contient les fonctions constantes, a priori, le score devrait être au pire de l'ordre de la valeur obtenue en mettant la moyenne, c'est à dire 350.000.
+Etonnament, on obtient un score de 430.000.
+Cela veut dire qu'avec une classe de fonction aussi simple que les fonctions linéaires, on overfitte déjà sur les données d'entrainement. Ou alors les données test réagissent totalement différemment que les données d'entrainements, dû par rapport à un paramètre manquant. 
+Mais ce n'est pas tellement étonnant; en effet, nous n'avons que 29 jeu de données statiques alors que ces données vivent dans un espace de dimension 18.
+Quelque soit la méthode employée, à moins d'avoir de la chance, on ne peut pas espérer obtenir une bonne prédiction.
 
-\subsection{Gradient boosting}
+\subsubsection{Gradient boosting}
+
+Nous avons choisi de tester également un algorithme plus élaboré et plus adapté au problème. Nous avons choisi la random forest (ou communement appelée gradient boosting dans sa version boostée, pour améliorer les performances et réduire l'overfitting). En effet, l les types de données du problème sont très diverses (mesure physiques, boolean, probabilités, ...), et bien qu'étant une regression, ce problème à une valeur décisionnelle importante. Comme nous l'avons vu, de nombreux paramètres interviennent de façon binaires. Par exemple beaucoup de vent ou beaucoup de pluie va entrainer automatiquement peu de polluant. 
+
+Nous avons donc fait tourner un algorithme de gradient boosting sur les données, après avoir interpoléUne application telle qu'elle du gradient boosting, 
+
+
+\subsection{Arrangement des données}
+
+\subsubsection{Gradient boosting}
+
+
+\subsubsection{Séparation}
+
+Jusqu'ici nous n'avons pas encore palier 

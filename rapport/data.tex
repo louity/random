@@ -7,7 +7,7 @@ Chaque ville comporte 4 ou 5 stations (29 au total sur les six villes, numérot�
 
 Pour chacune des stations, nous avons les variables explicatives suivantes:
 \begin{itemize}
-  \item 18 variables statiques, qui nous renseignent sur l'entourage du point où les mesures sont faites:
+  \item 19 variables statiques, qui nous renseignent sur l'entourage du point où les mesures sont faites:
   \begin{itemize}
     \item la surface cumulée de zones résidentielles à faible densité dans un rayon de 25/50/150/250/500 mètres autour du point
     \item la surface cumulée de zones résidentielles à haute densité dans un rayon de 25/50/150/250/500 mètres autour du point
@@ -52,24 +52,113 @@ Quelques remarques sur les données:
     Elle sont solubles dans l'eau; la pluie a donc une très grande influence sur leur concentration dans l'air.
     Le $NO_2$ est une molécule de taille ..., beaucoup plus petite que les particules, avec une inertie beaucoup plus faible.
     Elle est de plus bien moins sensible à la pluie que les micro particules.
-    Le comportement des différents pollutants est donc radicalement différent.
+    Le comportement des différents polluants est donc radicalement différent.
     Cela suggère de traiter différemment les microparticules et le $NO_2$.
   \item
     Nous n'avons aucune donnée géographique qui nous renseigne sur la position relative des différents points les uns par rapport aux autre, ni sur la position relative des éléments (par exemples les routes) qui sont dans l'entourage du point auquel est fait la mesure.
-    Nous ne pouvons donc pas espérer avoir de résultats précis.
-    Prenons par exemple la carte de pollution en $NO_2$ de la ville Gothenburg qui est prise en exemple dans l'article \cite{}:
+   Nous ne pouvons donc pas espérer apprendre les paramètres d'un modèles pertinent utilisant des théories physiques comme la conduction, qui nous permettraient d'avoir des résultats extrêmement précis ; il s'agit d'un pur problème de machine-learning.
+	\item
+    	Prenons une carte de répartition annuelle du $NO_2$ sur Paris (source : http://www.airqualitynow.eu):
     \begin{center}
-    \includegraphics[height=8cm]{images/pollution_gothenburg.png}
+    	%\includegraphics[height=8cm]{images/pollution_gothenburg.png}
+    	\includegraphics[height=8cm]{images/parisno2.jpg}
     \end{center}
-    On constate que la pollution en $NO_2$ est phénomène spatial, et on peut sans aucun doute trouver des points qui auront les même valeurs statiques (surfaces cumulées) et pour lesquels le niveau de pollution est pourtant très différent.
-    Notons au passage que les routes sont classés selon différents types qui semblent être déterminants pour la pollution en $NO_2$, or nous n'avons qu'un type de route à notre disposition
+    On constate que la pollution est phénomène spatial, et que le $NO_2$ est principalement concentré autour des grands axes routiers. Il est aussi pertinent de différencier les routes en différentes catégories selon leur fréquentation. Notons au passage que les routes sont classés selon différents types qui semblent être déterminants pour la pollution en $NO_2$, or nous n'avons qu'un type de route à notre disposition, et aucune information sur l'affluence. On peut donc sans aucun doute trouver des points qui auront les même valeurs statiques (surfaces cumulées) et pour lesquels le niveau de pollution est pourtant très différent.
   \item
     A une heure donnée, les données météorologique (température, vent, pression, ennuagement) sont les mêmes pour toutes les stations d'une zone.
     Ce sont donc uniquement les données statiques qui différencient les stations les unes des autres.
   \item
-    L'angle d'orientation du vent nous est donnée par son cosinus et son sinus, dont la somme des carrés ne font pas 1 en général (moyenne = 0.995, écart type =  0.06 , maximum =  1.995 , minimum = 2.4 $\cdot 10^{-11}$)
+    Nous avons fait un script pour vérifier autant que possible la cohérence des données, pour avoir une une idée du niveau de fiabilité des différents paramètres du problème. Nous avons alors repéré que l'angle d'orientation du vent nous est donnée par son cosinus et son sinus, dont la somme des carrés ne font pas 1 en général (moyenne = 0.995, écart type =  0.06 , maximum =  1.995 , minimum = 2.4 $\cdot 10^{-11}$)
   \item
-    Les données statiques nous sytématiquement répétées pour chaque valeur temporelle d'un polluant.
-    Nous avons donc fait un script pour vérifier que ce sont effectivement toujours les mêmes pour une station donnée.
+    Les données statiques nous sytématiquement répétées pour chaque valeur temporelle d'un polluant. %es ce vraiment utile de le dire
+    
 \end{itemize}
+
+\subsubsection{Influence des données constatées en première approche}
+%Faire analyse de l'influence a posteriori
+%Pluie, vent ect..
+
+\subsection{Exploration des valeurs}
+
+\subsubsection{Les données dynamiques}
+
+Pour se rendre compte de la répartition des valeurs des données dynamiques, on affiche les histogramme de ces valeurs sur une echelle logarithmique:
+
+% 2 fois pression !
+\begin{figure}[H]
+	\captionsetup{labelformat=empty}
+	\minipage{0.50\textwidth}
+	\includegraphics[width=\linewidth]{images/pression.png}
+	\caption{pression}
+	\endminipage\hfill
+	\minipage{0.50\textwidth}
+	\includegraphics[width=\linewidth]{images/log_pression.png}
+	\caption{pression sur échelle log}
+	\endminipage\hfill
+\end{figure}
+
+\begin{figure}[H]
+	\captionsetup{labelformat=empty}
+	\minipage{0.50\textwidth}
+	\includegraphics[width=\linewidth]{images/pression.png}
+	\caption{pression}
+	\endminipage\hfill
+	\minipage{0.50\textwidth}
+	\includegraphics[width=\linewidth]{images/log_pression.png}
+	\caption{pression sur échelle log}
+	\endminipage\hfill
+\end{figure}
+
+\begin{figure}[H]
+	\captionsetup{labelformat=empty}
+	\minipage{0.50\textwidth}
+	\includegraphics[width=\linewidth]{images/vent.png}
+	\caption{vent}
+	\endminipage\hfill
+	\minipage{0.50\textwidth}
+	\includegraphics[width=\linewidth]{images/log_vent.png}
+	\caption{vent sur échelle log}
+	\endminipage\hfill
+\end{figure}
+
+\begin{figure}[H]
+	\captionsetup{labelformat=empty}
+	\minipage{0.50\textwidth}
+	\includegraphics[width=\linewidth]{images/ennuagement.png}
+	\caption{ennuagement}
+	\endminipage\hfill
+	\minipage{0.50\textwidth}
+	\includegraphics[width=\linewidth]{images/log_ennuagement.png}
+	\caption{ennuagement sur échelle log}
+	\endminipage\hfill
+\end{figure}
+
+\begin{figure}[H]
+	\captionsetup{labelformat=empty}
+	\minipage{0.50\textwidth}
+	\includegraphics[width=\linewidth]{images/temperature.png}
+	\caption{temperature}
+	\endminipage\hfill
+	\minipage{0.50\textwidth}
+	\includegraphics[width=\linewidth]{images/log_temperature.png}
+	\caption{temperature sur échelle log}
+	\endminipage\hfill
+\end{figure}
+
+Il apparaît donc que les données sont plus étalées sur un échelles logarithmique.
+Dans la mesure ou nous cherchons à appliques des techniques de régression simples %pourquoi ? expliquer !
+et avec une forte régularité (regression lineaire), le fait d'utiliser des échelles logarithmiques est une première transformation que nous pouvons appliquer à nos données avant d'utiliser des modèles de régression simples.
+
+\subsubsection{Les données statiques}
+
+Les données statiques ne sont pas toutes renseignées sur certaines stations. Cela peut être problématique si l'on souhaite utiliser un algorithme d'apprentissage commun à toute les stations. Cependant, nous avons au moins une valeur par catégorie dans les données de type concentration, ce qui nous a permis d'interpoler les valeurs manquantes. Pour les autres (industrie, port, zones naturelles), les données sont considérées comme nulles si non renseignées.
+
+
+\subsection{Conclusion}
+
+En conclusion, les données du problèmes sont peu fiables et discutables. Le fait que les données sur les routes ne soient pas différenciées sera surement un problème pour prédire les concentrations de $NO_2$. De même, partager les même données dynamiques pour toutes les stations d'une zone est discutable, surtout concernant la force et l'orientation du vent, jouant pourtant un rôle essentiel dans l'évolution de la concentration.
+
+Un autre aspect important est cette distinction entre les données statiques (très variées et dont nous disposons que de 29 exemples) et les données dynamiques en grand nombre, identiques par zone, mais non redondantes entre les zones. Cela nous empêche donc d'apprendre un modèle par zone, et nuit à l'apprentissage d'un modèle commun aux zones. Cet aspect est la principale difficulté du problème.  
+
+Nous pouvant ainsi dès à présent anticiper que les prévisions de ce problème resteront très grossières, surtout concernant le $NO_2$.
 
