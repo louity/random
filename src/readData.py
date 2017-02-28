@@ -183,7 +183,7 @@ def getLearningData(data, unusedVariables = [], statiques = True, dynamiques = T
     if(dynamiques == False):
         d.drop(dynamiqueNames, axis = 1, inplace = True, errors = 'ignore')
 
-    toDrop = ['ID', 'zone_id', 'station_id', 'pollutant', 'y'];
+    toDrop = ['ID', 'y']; # 'zone_id', 'station_id', 'y'];
 
     d.drop(unusedVariables, axis = 1, inplace = True, errors = 'ignore');
     d.drop(toDrop, axis = 1, inplace = True, errors = 'ignore');
