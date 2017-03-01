@@ -278,6 +278,7 @@ def predictPollutant(dataTrain, dataTest,  plotFeaturesInfluence = False, plotDe
 
     #initialisation of the results
     nTest = len(dataTest.index);
+    print(nTest)
     yTest = np.zeros(nTest);
 
     for p in pollutants:
@@ -301,6 +302,7 @@ def predictPollutant(dataTrain, dataTest,  plotFeaturesInfluence = False, plotDe
         names = dpTest.columns
 
         idp = getIdPollutant(dataTest, p);
+        
 
         if(len(xpTest) > 0):
             ypTest = pp.predict(xpTest);
@@ -376,7 +378,7 @@ def tcheat(dataTrain, dataTest, yTest):
     yTest[d['index'].as_matrix()] = d['y'].as_matrix()
     return yTest;
 
-params = {'n_estimators': 200, 'max_depth': 6, 'min_samples_split': 2,
+params = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 2,
           'learning_rate': 0.01, 'loss': 'ls'}
 
 def predictWithLinearRegression(dataTrain, dataTest):
@@ -545,13 +547,10 @@ else:
 
     #dataTest = loadTrainData(); dataTrain = loadTrainData();
 
-    result = predictGlobal(dataTrain, dataTest);
+    dataTest = dataTrain.copy();
 
-    dataTest.loc[dataTest.pollutant == 0, 'pollutant'] = 'NO2';
-    dataTest.loc[dataTest.pollutant == 1, 'pollutant'] = 'PM2_5';
-    dataTest.loc[dataTest.pollutant == 2, 'pollutant'] = 'PM10';
-
+    result = predictPollutant(dataTrain, dataTest);
     getStatLearningTest(result, dataTest);
-    plt.show()
+
 
     saveResult(result, 'GradientBoostingTest.csv')
