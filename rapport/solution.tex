@@ -32,7 +32,7 @@ On essaie ensuite trois méthodes triviales:
     On met la valeur zéro pour toutes les prédictions: le score de 800 environ.
     Cela nous donne un ordre de grandeur sur les score: toute méthode donnant un score supérieur à 800 n'est vraiment pas adaptée.
   \item
-    On met une valeur constante pour chaque polluant égale à la moyenne de toutes les valeurs pour ce polluant: on obtient une score de 350 environ.
+    On met une valeur constante pour chaque polluant égale à la moyenne de toutes les valeurs pour ce polluant: on obtient une score de 380 environ.
   \item
     On calcule la valeur moyenne pour chaque polluant à chaque instant donné: on obtient un score de 440.000 environ.
     Cette méthode n'apporte rien par rapport à la valeur moyenne %A commenter
@@ -40,25 +40,55 @@ On essaie ensuite trois méthodes triviales:
 
 \subsection{Application brut aux données}
 
-\subsubsection{Regression linéaire}
+\subsubsection{Régression linéaire}
 
 On teste un modèle linéaire sur les données.
 Puisque le modèle linéaire contient les fonctions constantes, a priori, le score devrait être au pire de l'ordre de la valeur obtenue en mettant la moyenne, c'est à dire 350.000.
 Etonnament, on obtient un score de 430.000.
-Cela veut dire qu'avec une classe de fonction aussi simple que les fonctions linéaires, on overfitte déjà sur les données d'entrainement. Ou alors les données test réagissent totalement différemment que les données d'entrainements, dû par rapport à un paramètre manquant. 
+Cela veut dire qu'avec une classe de fonction aussi simple que les fonctions linéaires, on overfitte déjà sur les données d'entrainement. Ou alors les données test réagissent différemment que les données d'entrainements, dû par exemple à un paramètre important manquant. 
 Mais ce n'est pas tellement étonnant; en effet, nous n'avons que 29 jeu de données statiques alors que ces données vivent dans un espace de dimension 18.
-Quelque soit la méthode employée, à moins d'avoir de la chance, on ne peut pas espérer obtenir une bonne prédiction.
+Quelque soit la méthode employée, à moins d'avoir de la chance, on ne peut pas espérer obtenir une bonne prédiction. %A moderer ....
 
 \subsubsection{Gradient boosting}
 
-Nous avons choisi de tester également un algorithme plus élaboré et plus adapté au problème. Nous avons choisi la random forest (ou communement appelée gradient boosting dans sa version boostée, pour améliorer les performances et réduire l'overfitting). En effet, l les types de données du problème sont très diverses (mesure physiques, boolean, probabilités, ...), et bien qu'étant une regression, ce problème à une valeur décisionnelle importante. Comme nous l'avons vu, de nombreux paramètres interviennent de façon binaires. Par exemple beaucoup de vent ou beaucoup de pluie va entrainer automatiquement peu de polluant. 
+Nous avons choisi de tester également un algorithme plus élaboré et plus adapté au problème. Nous avons choisi la random forest (ou communement appelée gradient boosting dans sa version boostée, pour améliorer les performances et réduire l'overfitting). En effet, les types de données du problème sont très diverses (mesure physiques, boolean, probabilités, ...), et bien qu'étant une régression, ce problème à une valeur décisionnelle importante. Comme nous l'avons vu, de nombreux paramètres interviennent de façon binaires. Par exemple beaucoup de vent ou beaucoup de pluie va entrainer automatiquement peu de polluant. Enfin, comme expliqué, le risque d'overfitting est énorme.
 
-Nous avons donc fait tourner un algorithme de gradient boosting sur les données, après avoir interpoléUne application telle qu'elle du gradient boosting, 
+Nous avons donc fait tourner un algorithme de gradient boosting sur les données, après avoir interpolé les valeurs statiques manquantes, et avoir numéroté les différents polluants.
+
+Dans notre protocole, pour se rendre d'un éventuel overfitting, nous avons séparé les données d'entrainement en train/validation par station. Ainsi nous sommes a priori exactement dans les mêmes conditions que lors de la prédiction des données test. En outre, les données test ayant exactement les mêmes paramètres dynamiques par zone que les données d'entrainement, il est impossible de faire de l'overfitting vis-à-vis de ces-derniers.
+
+Nous avons comme résultat : 261 sur les données de validation, 302 sur les données test.
+
+Sur les données de validation, nous avons des prédictions nettement meilleurs sur les microparticules (environ 100) que sur le $NO_2$ (465), ce qui rejoint notre analyse a priori des données. En outre, nous pouvons afficher l'importance relative des données lors de l'apprentissage.
+
+\begin{center}
+	\includegraphics{images/importance feature global.png}
+\end{center}
+
+Ce graphique est très instructif, et on voit qu'il confirme nos raisonnements a priori sur les données. 
+\begin{itemize}
+	\item Le type de polluant a joué un rôle crucial dans la prédiction, ce qui nous confirme dans l'idée de séparer les polluants.
+	\item Les données statiques ont rôle moindre par rapport aux données dynamique, ce qui est étonnant, surtout pour les routes qui devrait beaucoup influer sur le $NO_2$. Cela nous conforte dans l'idée que les paramètres statiques en notre possession sont peu pertinents.
+	\item Le temps joue en rôle crucial également dans la prédiction. Bien que n'intervenant pas physiquement sur les polluant, il régit les activités humaines (et influe certain paramètres physiques), et donc la création de polluants.
+	\item le numero de la station (station_id) joue en rôle important aussi, supérieur aux données statiques. %A commenter
+\end{itemize} 
 
 
 \subsection{Arrangement des données}
 
 \subsubsection{Gradient boosting}
+
+Comme prévu, l'algorithme de gradient boosting fonctionne mieux que la régression linéaire, et ses résultats nous encouragent encore plus à séparer les polluants. Nous avons donc appliqué l'algorithme précédent à chaque polluant indépendamment. 
+
+En outre, appliquer tel quel l'algorithme aux données est améliorable.
+\begin{itemize}
+	\item Etant donné l'importance du temps, qui est brut sous sa forme présente, nous avons divisé en plusieurs heure/mois/jour %A completer
+	\item %Autre choses ?
+\end{itemize}  
+
+Les résultats sont bien meilleurs : 
+
+%Afficher graphique feature importance
 
 
 \subsubsection{Séparation}

@@ -522,6 +522,74 @@ def predictWithDaytimeMeanValue(dataTrain, dataTest, apply_log=False):
 
     return yTest
 
+
+def separation(dataTrainInit, dataTestInit, p):
+
+    dataTrain = getPollutant(dataTrainInit, p);
+    dataTest  = getPollutant(dataTestInit, p);
+
+    idp = getIdPollutant(dataTest, p);
+
+    #definition des gb, y = g(s,t)-f(d)
+    f = ensemble.GradientBoostingRegressor(**params)
+    g = ensemble.GradientBoostingRegressor(**params)
+
+    #g = g(s,t)
+    dataTrain.loc['g'] = 0;
+    #initialisation de g
+    for s in station_idAll:
+        for t in range(TIME_MAX):
+            d = d[(d.station_id == s) && (d.daytime == t)]
+
+
+    stations = drop_duplicates()
+
+    nIter = 5;
+    for i in range(nIter):
+
+
+    #Lecture de l'entree
+    datap = getPollutant(dataTrain, p)
+    datapTrain, ypTrain = getLearningPollutantData(datap, p);
+    xpTrain = datapTrain;
+    names = datapTrain.columns;
+
+    print("Predicting {1} : {0} data".format(len(xpTrain), p))
+
+    #Training of the gradient boosting
+    pp = ensemble.GradientBoostingRegressor(**params)
+    pp.fit(xpTrain, ypTrain);
+
+    #Testing part
+    dataptest = getPollutant(dataTest, p)
+    dpTest, ypT = getLearningPollutantData(getPollutant(dataptest, p), p);
+    xpTest = dpTest;
+    names = dpTest.columns
+
+    idp = getIdPollutant(dataTest, p);
+
+    if(len(xpTest) > 0):
+        ypTest = pp.predict(xpTest);
+    print(ypTest);
+    #Control affichage
+    if(isTest):
+        print("mse : {0}".format(score_function(ypTest, ypT)))
+
+        if(plotDeviance):
+            plotDeviance(pp, xpTest, ypT, ypTest, title = 'PredictPollutant : pollutant {0}'.format(p));
+        if(plotFeaturesInfluence):
+            plotFeatureImportance(pp, names, title = 'PredictPollutant : pollutant {0}'.format(p))
+
+    yTest[idp] = ypTest[:];
+
+
+
+
+
+
+
+
+
 TestAlgo = True; # TestAlgo = False;
 
 if(not TestAlgo):

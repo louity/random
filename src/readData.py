@@ -28,6 +28,8 @@ industry = ['industry_1000']
 pollutants = ['NO2', 'PM10', 'PM2_5']
 station_idTrain = [16,17,20,1,18,22,26,28,6,9,25,4,10,23,5,8,11]
 station_idTest = [21,27,1,29,15,12,14,0,3,2,13,19]
+station_idAll = [16,17,20,1,18,22,26,28,6,9,25,4,10,23,5,8,11,21,27,29,15,12,14,0,3,2,13,19]
+TIME_MAX = 14257
 zone_id = [0, 1, 2, 3, 4, 5]
 
 
@@ -299,6 +301,14 @@ def getStatLearningTest(result, dataTest):
                 s = s+'{0} -> mse = {1}, '.format(p, score_function(y1, y2))
         print(s)
 
+    s = "Pollutant MSE : ";
+    for p in pollutants:
+        d = data[data.pollutant == p];
+        y1 = d['y'].as_matrix(); y2 = d['TARGET'].as_matrix();
+        s = s+"{0} -> {1}, ".format(p, score_function(y1, y2));
+
+    print(s);
+
     y1 = data['y'].as_matrix(); y2 = data['TARGET'].as_matrix();
     print('\nGlobal MSE : {0}'.format(score_function(y1, y2)))
 
@@ -460,29 +470,11 @@ if __name__ == "__main__":
 
 
     data = loadTrainData();
-    recenter(data);
-    normalise(data);
-    printStationParameters(data, -1)
+    data = data[data.zone_id == 0];
+    data = data[data.daytime == 158];
+    print(data.head(10));
 
-    #print(data)
-
-
-    1/0
-
-
-    for z in zone_id:
-        d = getZone(data,z);
-        d, y = getLearningZoneData(d, z);
-
-        d.drop_duplicates(subset = 'zone_id', inplace = True)
-        print(d.columns)
-
-    # X.drop('ID', axis = 1, inplace = True, level = 1)
-    #X = getStation(X, 16)
-    # print(getLearningData(X, statiques = False))
-
-    # Xstation1 = getStation(X, 1);
-    #print(Xstation1);
-
-
-    # Xstation1 = recenter(Xstation1);
+    data = loadTestData();
+    data = data[data.zone_id == 0];
+    data = data[data.daytime == 158];
+    print(data.head(10));
