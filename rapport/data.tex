@@ -56,22 +56,21 @@ La tâche s'annonce donc compliquée.
     Nous n'avons aucune donnée géographique qui nous renseigne sur la position relative des différents points les uns par rapport aux autre, ni sur la position relative des éléments (par exemples les routes) qui sont dans l'entourage du point auquel est fait la mesure.
    Nous ne pouvons donc pas espérer apprendre les paramètres d'un modèles pertinent utilisant des théories physiques comme la conduction, qui nous permettraient d'avoir des résultats extrêmement précis ; il s'agit d'un pur problème de machine-learning.
 	\item
-    	Prenons une carte de répartition annuelle du $NO_2$ sur Paris (source : %mettre ref http://www.airqualitynow.eu):
+    Prenons une carte de répartition annuelle du $NO_2$ sur Paris (source : \cite{pollutionWebsite1}
     \begin{center}
-    	%\includegraphics[height=8cm]{images/pollution_gothenburg.png}
     	\includegraphics[height=8cm]{images/parisno2.jpg}
     \end{center}
-    On constate que la pollution est phénomène spatial, et que le $NO_2$ est principalement concentré autour des grands axes routiers. Il est aussi pertinent de différencier les routes en différentes catégories selon leur fréquentation. Notons au passage que les routes sont classés selon différents types qui semblent être déterminants pour la pollution en $NO_2$, or nous n'avons qu'un type de route à notre disposition, et aucune information sur l'affluence. On peut donc sans aucun doute trouver des points qui auront les même valeurs statiques (surfaces cumulées) et pour lesquels le niveau de pollution est pourtant très différent.   
+    On constate que la pollution est phénomène spatial, et que le $NO_2$ est principalement concentré autour des grands axes routiers.
+    Il semble indispensable de différencier les routes selon leur fréquentation, or nous n'avons qu'un type de route à notre disposition, et aucune information sur l'affluence.
+    On peut donc sans aucun doute trouver des points qui sont à la même distance d'une route et pour lesquels le niveau de pollution est pourtant très différent.
   \item
-  	Si l'on cherche une carte de répartition de mircoparticules, on trouve ce type de données (source http://www.chroniques-cartographiques.fr) :
+    Si l'on cherche une carte de répartition de mircoparticules, on trouve ce type de données (source \cite{pollutionWebsite2}):
   	\begin{center}
   		\includegraphics[width = 0.5\linewidth]{images/francepm10.jpg}
-  	\end{center}    
+  	\end{center}
   	Il apparaît donc que les mirco-particules se répartissent de façon nettement plus globales, et donc sont a priori beaucoup plus sensibles aux phénomènes météorologiques qu'aux données statiques, très locales.
   \item
     Nous avons fait un script pour vérifier autant que possible la cohérence des données, pour avoir une une idée du niveau de fiabilité des différents paramètres du problème. Nous avons alors repéré que l'angle d'orientation du vent nous est donnée par son cosinus et son sinus, dont la somme des carrés ne font pas 1 en général (moyenne = 0.995, écart type =  0.06 , maximum =  1.995 , minimum = 2.4 $\cdot 10^{-11}$)
- 
-    
 \end{itemize}
 
 
@@ -81,12 +80,82 @@ La tâche s'annonce donc compliquée.
 \subsubsection{Influence des données constatées en première approche}
 %Faire analyse de l'influence a posteriori, pca, ect...
 %Pluie, vent ect..
+Afin d'avoir une première idée globale de l'influence des variables météorologiques, on affiche dans le plan les points (concentraion, valeur météorologiques) pour les différents polluants et les différentes valeur météorologiques.
+Pour les particules $PM_{2,5}$:
+\begin{figure}[H]
+	\captionsetup{labelformat=empty}
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/PM2_5_precip_y.png}
+  \caption{concentration en $PM_{2,5}$ en fonction des précipitations}
+	\endminipage\hfill
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/PM2_5_windspeed_y.png}
+  \caption{concentration en $PM_{2,5}$ en fonction de la vitesse du vent}
+	\endminipage\hfill
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/PM2_5_temp_y.png}
+  \caption{concentration en $PM_{2,5}$ en fonction de la vitesse de la température}
+	\endminipage\hfill
+\end{figure}
+Les précipitations ont une importance nette sur la pollution en $PM_{2,5}$.
+Le constat est moins net concernant la vitesse du vent tandis que pour la température, on ne voit pas de tendance que se dessine.
 
+\begin{figure}[H]
+	\captionsetup{labelformat=empty}
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/PM2_5_cloud_y.png}
+  \caption{concentration en $PM_{2,5}$ en fonction de la vitesse de l'ennuagement}
+	\endminipage\hfill
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/PM2_5_pressure_y.png}
+  \caption{concentration en $PM_{2,5}$ en fonction de la vitesse de la pression}
+	\endminipage\hfill
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/PM2_5_daytime_y.png}
+  \caption{concentration en $PM_{2,5}$ en fonction de l'heure de la journée}
+	\endminipage\hfill
+\end{figure}
+On voit que l'ennuagement ne semble pas avoir d'influence déterminante, tandis que lorsque la pression es haute, les concentrations ont tendance à être plus élevées.
+L'heure de la journée ne semble pas non plus être déterminante.
+
+Pour les particules $NO_2$:
+\begin{figure}[H]
+	\captionsetup{labelformat=empty}
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/NO2_precip_y.png}
+  \caption{concentration en $NO_2$ en fonction des précipitations}
+	\endminipage\hfill
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/NO2_windspeed_y.png}
+  \caption{concentration en $NO_2$ en fonction de la vitesse du vent}
+	\endminipage\hfill
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/NO2_temp_y.png}
+  \caption{concentration en $NO_2$ en fonction de la vitesse de la température}
+	\endminipage\hfill
+\end{figure}
+Les précipitations ont une importance nette sur la pollution en $PM_{2,5}$.
+Le constat est moins net concernant la vitesse du vent tandis que pour la température, on ne voit pas de tendance que se dessine.
+
+\begin{figure}[H]
+	\captionsetup{labelformat=empty}
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/NO2_cloud_y.png}
+  \caption{concentration en $NO_2$ en fonction de la vitesse de l'ennuagement}
+	\endminipage\hfill
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/NO2_pressure_y.png}
+  \caption{concentration en $NO_2$ en fonction de la vitesse de la pression}
+	\endminipage\hfill
+	\minipage{0.33\textwidth}
+	\includegraphics[width=\linewidth]{images/NO2_daytime_y.png}
+  \caption{concentration en $NO_2$ en fonction de la vitesse de l'heure de la journée}
+	\endminipage\hfill
+\end{figure}
 \subsubsection{Les données dynamiques}
 
 Pour se rendre compte de la répartition des valeurs des données dynamiques, on affiche les histogramme de ces valeurs sur une echelle logarithmique:
 
-% 2 fois pression !
 \begin{figure}[H]
 	\captionsetup{labelformat=empty}
 	\minipage{0.50\textwidth}
@@ -99,12 +168,6 @@ Pour se rendre compte de la répartition des valeurs des données dynamiques, on
 	\endminipage\hfill
 \end{figure}
 
-
-
-Il apparaît donc que les données sont plus étalées sur un échelles logarithmique.
-Dans la mesure ou nous cherchons à appliquer des techniques de régression simples %pourquoi ? expliquer !
-et avec une forte régularité (regression lineaire), le fait d'utiliser des échelles logarithmiques est une première transformation que nous pouvons appliquer à nos données avant d'utiliser des modèles de régression simples.
-
 \subsubsection{Les données statiques}
 
 Les données statiques ne sont pas toutes renseignées sur certaines stations. Cela peut être problématique si l'on souhaite utiliser un algorithme d'apprentissage commun à toute les stations. Cependant, nous avons au moins une valeur par catégorie dans les données de type concentration cumulées, ce qui nous a permis d'interpoler les valeurs manquantes. Pour les autres (industrie, port, zones naturelles), les données sont considérées comme nulles si non renseignées, ce qui semble être raisonnable.
@@ -114,7 +177,7 @@ Les données statiques ne sont pas toutes renseignées sur certaines stations. C
 
 En conclusion, les données du problèmes sont peu fiables et discutables. Le fait que les données sur les routes ne soient pas différenciées sera surement un problème pour prédire les concentrations de $NO_2$. De même, partager les même données dynamiques pour toutes les stations d'une zone est discutable, surtout concernant la force et l'orientation du vent, jouant pourtant un rôle essentiel dans l'évolution de la concentration.
 
-Un autre aspect important est cette distinction entre les données statiques (très variées et dont nous disposons que de 17 exemples) et les données dynamiques en grand nombre, identiques par zone, mais non redondantes entre les zones. Cela nous empêche donc d'apprendre un modèle par zone, et nuit à l'apprentissage d'un modèle commun aux zones. Cet aspect est la principale difficulté du problème.  
+Un autre aspect important est cette distinction entre les données statiques (très variées et dont nous disposons que de 17 exemples) et les données dynamiques en grand nombre, identiques par zone, mais non redondantes entre les zones. Cela nous empêche donc d'apprendre un modèle par zone, et nuit à l'apprentissage d'un modèle commun aux zones. Cet aspect est la principale difficulté du problème.
 
 Nous pouvant ainsi dès à présent anticiper que les prévisions de ce problème resteront très grossières, surtout concernant le $NO_2$.
 

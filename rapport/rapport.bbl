@@ -1,5 +1,12 @@
 \begin{thebibliography}{1}
 
+\bibitem{pollutionWebsite1}
+Information about paris pollution.
+\newblock \url{http://www.airqualitynow.eu/city_info/paris/page1.php}.
+
+\bibitem{pollutionWebsite2}
+\url{http://www.chroniques-cartographiques.fr}.
+
 \bibitem{NO2reg}
 Mateus Habermann, Monica Billger, and Marie Haeger-Eugensson.
 \newblock Land use regression as method to model air pollution. previous
