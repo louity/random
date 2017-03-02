@@ -1,4 +1,12 @@
 \subsection{Conclusion}
 
+Ce projet a été enrichissant dans le mesure où nous nous sommes frottés à un problème concret avec des données réelles, et nous avons pu mettre en oeuvre nos connaissances pour analyser le problème posé et les données à disposition et faire des prédictions.
+Cependant, nous avons l'impression que Plume Labs n'a pas complètement joué le jeu, en proposant un benchmark pas très bon (une valeur constante faisant nettement mieux), et en cachant par exemple le fait que les données météorologiques soient toutes les mêmes.
 
-bla bla bla c'est pourri
+De façon plus général, nous trouvons dommage cette approche du problème exclusivement du point de vue de l'apprentissage.
+En effet, il existe des modèle de mécanique des fluides qui permettent d'expliquer une partie de la pollution.
+Plutôt que d'appliquer des techniques d'apprentissage directement sur le problème, il serait sans doute intéressant d'appliquer des techniques d'apprentissage sur l'écart que l'on constate entre le modèle physique et la réalité.
+Ce faisant, on pourrait décrire statistiquement les cas dans lesquels le modèle de mécanique des fluides ne marche pas bien, et quelles variables explicatives entrent en compte pour la prédiction.
+Cela pourrait éventuellement nous amener à raffiner le modèle physique.
+En itérant le procédé, faisant un va et vient entre techniques d'apprentissage et modélisation physique, on peut espérer obtenir un modèle que prenne le meilleur des deux approches, et qui propose donc des prédictions précises.
+
