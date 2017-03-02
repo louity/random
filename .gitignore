@@ -5,4 +5,9 @@
 **/*.pyc
 src/data/*
 rapport/rapport.log
-
+rapport/*.aux
+rapport/*.pdf
+rapport/*.log
+rapport/*.blg
+rapport/*.out
+rapport/*.synctex.gz
