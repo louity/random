@@ -208,11 +208,11 @@ gFeatureNames = ['hlres_50', 'green_5000', 'hldres_50', 'route_100', 'hlres_1000
 fFeatureNames = ['temperature', 'precipprobability', 'precipintensity',
    'windbearingcos','windbearingsin', 'windspeed','cloudcover',  'pressure', 'is_calmday']
 
-params = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 2,
+params = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
-paramsf = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 2,
+paramsf = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
-paramsg = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 2,
+paramsg = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
 
 #Ne garde que les données statiques, robuste si des colonnes ont deja ete enlevee
@@ -240,6 +240,8 @@ def realGtoG(realg, data):
 
 def gtoRealG(g, data):
     data.loc[:,'g'] = g;
+    for s in station_idAll:
+        data.loc[data.station_id == s, 'g'] = np.mean(data.loc[data.station_id == s, 'g']);
     stations = data.drop_duplicates(subset = 'station_id')
     return stations.g
 
@@ -271,8 +273,11 @@ def separation(dataTrainInit, dataTestInit, p, result):
     dtrain = getFFeatures(dataTrain);
     strain = getGFeatures(dataTrain);
     ytrain = dataTrain.y
-    nIter = 10;
+    nIter = 5;
     for i in range(nIter):
+        f = ensemble.GradientBoostingRegressor(**paramsf)
+        g = ensemble.GradientBoostingRegressor(**paramsg)
+
         #predict f
         ftrain = gtrain-ytrain;
         f.fit(dtrain, ftrain);
@@ -281,7 +286,7 @@ def separation(dataTrainInit, dataTestInit, p, result):
         print("f error : {0}".format(score_function(fPredicted, ftrain)))
 
         #Predict g
-        gtrain = ytrain + ftrain;
+        gtrain = ytrain + fPredicted;
         gRealTrain = gtoRealG(gtrain, dataTrain);
         g.fit(strain, gRealTrain);
 
@@ -298,13 +303,16 @@ def separation(dataTrainInit, dataTestInit, p, result):
     gRealtest = g.predict(stest);
     gtest = realGtoG(gRealtest, dataTest)
 
+
     ftest = f.predict(dtest);
+    print(gtest);
+    print(ftest.head(10))
 
     ypTest = gtest - ftest;
     yTest = result.TARGET.as_matrix();
     yTest[idp] = ypTest[:];
 
-    return arrayToResult(yTest, dataTest)
+    return arrayToResult(yTest, dataTestInit)
 
 TestAlgo = True; # TestAlgo = False;
 
@@ -318,7 +326,7 @@ else:
     recenter(data); normalise(data);
     #data = getZone(data, 2);
     stationTest = [1, 4, 5, 6, 16, 26];
-    stationTest = [20, 22, 23, 25, 28, 11]
+    #stationTest = [20, 22, 23, 25, 28, 11];
 
     dataTest = data[data['station_id'].isin(stationTest)];
     dataTest.reset_index(drop = True, inplace = True)
@@ -327,7 +335,7 @@ else:
     nTest = len(dataTest.index)
     result = arrayToResult(np.zeros(nTest), dataTest)
 
-    dataTest = loadTrainData(); dataTrain = loadTrainData();
+    #dataTest = loadTrainData(); dataTrain = loadTrainData();
 
     result = predictPollutant(dataTrain, dataTest);
     getStatLearningTest(result, dataTest);

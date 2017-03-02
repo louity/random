@@ -93,4 +93,8 @@ Les résultats sont bien meilleurs :
 
 \subsubsection{Séparation}
 
-Jusqu'ici nous n'avons pas encore palier 
+Jusqu'ici nous n'avons pas encore essayé de palier à la bivalence des données d'entrainement. Les données dynamiques joue le rôle principal, mais le problème consiste à apprendre l'influence des données statiques (nous devons predire sur de nouvelles stations, et non sur de nouvelles données météorologiques). Dans l'application des algorithmes jusqu'à présent, les très maigres données statiques sont noyées dans la multitude des données dynamiques. Or le problème voudrait que l'on apprenne juste la dépendance envers les données dynamiques via les données statiques.
+
+De plus, en première approximation, les données statiques et dynamiques jouent des rôles opposés. Les données statiques, purement liées aux activités humaines, régissent la création de polluant, alors que les données météorologiques régissent la dispersion des polluants. Nous pouvons donc modéliser la dépendance des paramètres, en notant $s$ pour statique, $d$ pour dynamique et $t$ pour le temps : $$ p(s,d,t) = g(s,t) - f(d)$$ avec g et f deux fonctions à apprendre. Cela nous permet de séparer les données et ainsi d'apprendre mieux la dépendance statique.
+
+En pratique, n'ayant pas accès à $f$ et $g$, nous apprenons les deux l'un après l'autre. On initialise $g$ par le maximum de polluant observé par station sur la durée donnée. Puis on apprend $f$, qu'on utilise pour apprendre $g$ et ainsi de suite, en espérant une convergence. 
