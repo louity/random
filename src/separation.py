@@ -334,7 +334,7 @@ def separation(dataTrainInit, dataTestInit, p, result):
 
     return arrayToResult(yTest, dataTestInit)
 
-TestAlgo = True; TestAlgo = False;
+TestAlgo = True; #a TestAlgo = False;
 
 if(not TestAlgo):
     dataTrain = loadTrainData(); dataTest = loadTestData()
@@ -342,11 +342,11 @@ if(not TestAlgo):
     result = predictPollutant(dataTrain, dataTest);
 
     result = separation(dataTrain, dataTest, 'NO2', result);
-    saveResult(result, 'separationNo2.csv')
+    saveResult(result, 'separationNo2v2.csv')
     result = separation(dataTrain, dataTest, 'PM10', result);
     result = separation(dataTrain, dataTest, 'PM2_5', result);
 
-    saveResult(result, 'separationTotal.csv');
+    saveResult(result, 'separationTotalv2.csv');
     #result = predictNO2(dataTrain, dataTest, result);
 else:
     data = loadTrainData();
