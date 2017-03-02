@@ -1,0 +1,17 @@
+\begin{thebibliography}{1}
+
+\bibitem{NO2reg}
+Mateus Habermann, Monica Billger, and Marie Haeger-Eugensson.
+\newblock Land use regression as method to model air pollution. previous
+  results for gothenburg/sweden.
+\newblock {\em Procedia Engineering}, 115:21--28, 2015.
+
+\bibitem{PMreg}
+Scott Weichenthal, Keith Van~Ryswyk, Alon Goldstein, Scott Bagg, Maryam
+  Shekkarizfard, and Marianne Hatzopoulou.
+\newblock A land use regression model for ambient ultrafine particles in
+  montreal, canada: A comparison of linear regression and a machine learning
+  approach.
+\newblock {\em Environmental research}, 146:65--72, 2016.
+
+\end{thebibliography}
