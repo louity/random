@@ -207,11 +207,11 @@ gFeatureNames = ['hlres_50', 'green_5000', 'hldres_50', 'route_100', 'hlres_1000
    'hlres_300', 'hldres_300', 'route_300', 'route_500', 'hlres_500', 'hlres_100',
    'industry_1000',  'hldres_500', 'hldres_1000', 'zone_id', 'hour', 'is_calmday']#, 'daytime']
 fFeatureNames = ['temperature', 'precipprobability', 'precipintensity',
-   'windbearingcos','windbearingsin', 'windspeed','cloudcover',  'pressure', 'is_calmday', 'hour', 'day']
+   'windbearingcos','windbearingsin', 'windspeed','cloudcover',  'pressure', 'is_calmday', 'hour', 'day', 'week', 'month']
 
-params = {'n_estimators': 300, 'max_depth': 6, 'min_samples_split': 3,
+params = {'n_estimators': 400, 'max_depth': 8, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
-paramsf = {'n_estimators': 300, 'max_depth': 6, 'min_samples_split': 3,
+paramsf = {'n_estimators': 400, 'max_depth': 8, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
 paramsg = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
@@ -339,7 +339,7 @@ TestAlgo = True; TestAlgo = False;
 if(not TestAlgo):
     dataTrain = loadTrainData(); dataTest = loadTestData()
 
-    result = predictGlobal(dataTrain, dataTest);
+    result = predictPollutant(dataTrain, dataTest);
 
     result = separation(dataTrain, dataTest, 'NO2', result);
     saveResult(result, 'separationNo2.csv')
@@ -350,7 +350,7 @@ if(not TestAlgo):
     #result = predictNO2(dataTrain, dataTest, result);
 else:
     data = loadTrainData();
-    recenter(data); normalise(data);
+    # recenter(data); normalise(data);
     #data = getZone(data, 2);
     stationTest = [1, 4, 5, 6, 16, 26];
     stationTest = [20, 22, 23, 25, 28, 11];
@@ -364,12 +364,16 @@ else:
 
     #dataTest = loadTrainData(); dataTrain = loadTrainData();
 
-    result = predictPollutant(dataTrain, dataTest);
-    getStatLearningTest(result, dataTest);
-    result = separation(dataTrain, dataTest, 'NO2', result);
-    getStatLearningTest(result, dataTest);
-    result = separation(dataTrain, dataTest, 'PM10', result);
-    getStatLearningTest(result, dataTest);
-    result = separation(dataTrain, dataTest, 'PM2_5', result);
-    getStatLearningTest(result, dataTest);
+    result = predictPollutant(dataTrain, dataTest, plotFeaturesInfluence = True, showDirect = False)
     plt.show();
+
+
+    # result = predictPollutant(dataTrain, dataTest);
+    # getStatLearningTest(result, dataTest);
+    # result = separation(dataTrain, dataTest, 'NO2', result);
+    # getStatLearningTest(result, dataTest);
+    # result = separation(dataTrain, dataTest, 'PM10', result);
+    # getStatLearningTest(result, dataTest);
+    # result = separation(dataTrain, dataTest, 'PM2_5', result);
+    # getStatLearningTest(result, dataTest);
+    # plt.show();

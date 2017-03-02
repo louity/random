@@ -7,6 +7,8 @@ Comme nous l'avons vu dans la section 1, le principal défi du problème est de 
 On commence par implémenter une methode des K plus proches voisins sur les données brutes séparées polluant par polluant.
 On fait plusieurs essais et voici ce qu'on obtient:
 
+\begin{center}
+
 \begin{tabular}{|c|c|c|}
   \hline
   score & methode & K \\
@@ -20,7 +22,7 @@ On fait plusieurs essais et voici ce qu'on obtient:
   613.892 & par polluant et par zone & K = 4\\
   \hline
 \end{tabular}
-
+	\end{center}
 Etonnament, le fait de faire la méthode par polluant et par zone ne change pas le résultat.
 De plus, on n'est pas très loin du score du benchmark proposé par Plume Labs (501).
 
@@ -97,7 +99,7 @@ Les importances des paramètres ne font que confirmer ...
 
 Jusqu'ici nous n'avons pas encore essayé de palier à la bivalence des données d'entrainement. Les données dynamiques joue le rôle principal, mais le problème consiste à apprendre l'influence des données statiques (nous devons predire sur de nouvelles stations, et non sur de nouvelles données météorologiques). Dans l'application des algorithmes jusqu'à présent, les très maigres données statiques sont noyées dans la multitude des données dynamiques. Or le problème voudrait que l'on apprenne juste la dépendance envers les données dynamiques via les données statiques.
 
-De plus, en première approximation, les données statiques et dynamiques jouent des rôles opposés. Les données statiques, purement liées aux activités humaines, régissent la création de polluant, alors que les données météorologiques régissent la dispersion des polluants. Nous pouvons donc modéliser la dépendance des paramètres, en notant $s$ pour statique, $d$ pour dynamique et $t$ pour le temps : $$ p(s,d,t) = g(s,t) - f(d)$$ avec g et f deux fonctions à apprendre. Cela nous permet de séparer les données et ainsi d'apprendre mieux la dépendance statique.
+De plus, en première approximation, les données statiques et dynamiques jouent des rôles opposés. Les données statiques, purement liées aux activités humaines, régissent la création de polluant, alors que les données météorologiques régissent la dispersion des polluants. Nous pouvons donc modéliser la dépendance des paramètres, en notant $s$ pour statique, $d$ pour dynamique et $t$ pour le temps : $$ p(s,d) = g(s) - f(d)$$ avec g et f deux fonctions à apprendre. Cela nous permet de séparer les données et ainsi d'apprendre mieux la dépendance statique. Cependant, la séparation n'étant plus vraiment statique/dynamique, mais plutôt création/destruction de polluant. On inclut donc dans $s$, en plus des données statiques, les heures et le champ $is_calmday$.
 
 En pratique, n'ayant pas accès à $f$ et $g$, nous apprenons les deux l'un après l'autre. On initialise $g$ par le maximum de polluant observé par station sur la durée donnée. Puis on apprend $f$, qu'on utilise pour apprendre $g$ et ainsi de suite, en espérant une convergence. 
 
@@ -115,8 +117,7 @@ En pratique, n'ayant pas accès à $f$ et $g$, nous apprenons les deux l'un apr�
 	\caption{Algorithme d'entrainement de la méthode séparation}
 \end{algorithm}
 
-En pratique l'algorithme converge rapidement, et les résultats sont :
- - si g(s,t) = g(s)
- - si g(s,t) = g(s,t)
- - si g(s,t) = g(s,t,calmday)
+En pratique l'algorithme converge rapidement, et les résultats sont très convaincants. Nous obtenons sur les données de validation de meilleurs résultats qu'avec le gradient boosting. On obtient une erreur de 140 au lieu de 160, et l'erreur sur les données d'entrainements sont de  contre , ce qui laisse présager moins d'overfitting. Sur les données test, on obtient un score de , ce qui n'est pas très ettonnant compte tenu des remarques précédentes, on ne pouvait pas forcement faire beaucoup mieux, mais il nous semblait interessant d'essayer cette heuristique.
+
+
 
