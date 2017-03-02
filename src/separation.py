@@ -212,11 +212,11 @@ gFeatureNames = ['hlres_50', 'green_5000', 'hldres_50', 'route_100', 'hlres_1000
 fFeatureNames = ['temperature', 'precipprobability', 'precipintensity',
    'windbearingcos','windbearingsin', 'windspeed','cloudcover',  'pressure', 'is_calmday', 'hour', 'day', 'month']
 
-params = {'n_estimators': 50, 'max_depth': 3, 'min_samples_split': 3,
+params = {'n_estimators': 400, 'max_depth': 8, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
-paramsf = {'n_estimators': 50, 'max_depth': 3, 'min_samples_split': 2,
+paramsf = {'n_estimators': 400, 'max_depth': 8, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
-paramsg = {'n_estimators': 50, 'max_depth': 3, 'min_samples_split': 2,
+paramsg = {'n_estimators': 400, 'max_depth': 8, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
 
 hourSet = range(0,24);
@@ -270,9 +270,10 @@ def initG(data):
                 data.loc[getRows(s,h,day,False, data), 'g'] = np.max(data.loc[getRows(s,h,day,False, data), 'y']);
 
 def plotGraphG(data, calmday):
-    for s in station_idAll:
+    for s in station_idTrain:
         d = data[(data.station_id == s) & (data.is_calmday == calmday)];
-
+        if(len(d.index) < 168):
+            continue;
         d = d.drop_duplicates(subset = ['hour', 'day']);
         g = d.g.as_matrix();
         h = d.hour.as_matrix();
@@ -283,7 +284,8 @@ def plotGraphG(data, calmday):
 
         plt.figure();
         plt.plot(t,g, 'ro');
-    plt.show();
+        plt.title('station {0}'.format(s))
+
 
 def separation(dataTrainInit, dataTestInit, p, result):
 
@@ -315,7 +317,7 @@ def separation(dataTrainInit, dataTestInit, p, result):
     strain = getGFeatures(dataTrain);
     gFeatureNames = strain.columns;
     ytrain = dataTrain.y.as_matrix()
-    nIter = 6;
+    nIter = 4;
     for i in range(nIter):
         f = ensemble.GradientBoostingRegressor(**paramsf)
         g = ensemble.GradientBoostingRegressor(**paramsg)
@@ -393,12 +395,13 @@ else:
     # plt.show();
 
 
-    #result = predictPollutant(dataTrain, dataTest,  plotFeaturesInfluence = True, isTest = True);
-    #getStatLearningTest(result, dataTest);
+    result = predictPollutant(dataTrain, dataTest,  plotFeaturesInfluence = True, isTest = True);
+    getStatLearningTest(result, dataTest);
     result = separation(dataTrain, dataTest, 'NO2', result);
     getStatLearningTest(result, dataTest);
-    # result = separation(dataTrain, dataTest, 'PM10', result);
-    # getStatLearningTest(result, dataTest);
-    # result = separation(dataTrain, dataTest, 'PM2_5', result);
-    # getStatLearningTest(result, dataTest);
-    # plt.show();
+    plt.show();
+    result = separation(dataTrain, dataTest, 'PM10', result);
+    getStatLearningTest(result, dataTest);
+    result = separation(dataTrain, dataTest, 'PM2_5', result);
+    getStatLearningTest(result, dataTest);
+    plt.show();
