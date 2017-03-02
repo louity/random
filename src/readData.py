@@ -38,9 +38,8 @@ zone_id = [0, 1, 2, 3, 4, 5]
 #Ajoute des données temporelles aux données
 def addTemporalValues(data):
     daytimeToHour = lambda x: x % 24
-    daytimeToDay = lambda x: math.floor(x / 24)
-    daytimeToWeek = lambda x: math.floor(x / (24 * 7))
-    daytimeToMonth = lambda x: math.floor(x / (24 * 7 * 4))
+    daytimeToDay = lambda x: math.floor(x / 24) % 7
+    daytimeToMonth = lambda x: math.floor(x / (24 * 7 * 4)) % 12
 
     daytime = data['daytime']
 
@@ -48,12 +47,10 @@ def addTemporalValues(data):
     hour.columns = ['hour']
     day = pd.DataFrame(daytime.apply(daytimeToDay))
     day.columns = ['day']
-    week = pd.DataFrame(daytime.apply(daytimeToWeek))
-    week.columns = ['week']
     month = pd.DataFrame(daytime.apply(daytimeToMonth))
     month.columns = ['month']
 
-    return pd.concat([data.drop('daytime', axis=1), hour, day, week, month], axis=1)
+    return pd.concat([data.drop('daytime', axis=1), hour, day, month], axis=1)
 
 
 
