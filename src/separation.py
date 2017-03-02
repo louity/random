@@ -145,6 +145,7 @@ def plotDeviance(learner, xTest, yTest, yPredicted, title = '', showDirect = Fal
         plt.show();
 
 def plotFeatureImportance(learner, names, title = '', showDirect = True):
+    plt.figure();
     feature_importance = learner.feature_importances_
     # make importances relative to max importance
     feature_importance = 100.0 * (feature_importance / feature_importance.max())
@@ -204,16 +205,18 @@ idInfoNames = ['ID', 'zone_id', 'station_id', 'pollutant']
 gFeatureNames = ['hlres_50', 'green_5000', 'hldres_50', 'route_100', 'hlres_1000',
    'route_1000', 'roadinvdist', 'port_5000', 'hldres_100', 'natural_5000',
    'hlres_300', 'hldres_300', 'route_300', 'route_500', 'hlres_500', 'hlres_100',
-   'industry_1000',  'hldres_500', 'hldres_1000', 'zone_id']#, 'daytime']
+   'industry_1000',  'hldres_500', 'hldres_1000', 'zone_id', 'hour', 'is_calmday']#, 'daytime']
 fFeatureNames = ['temperature', 'precipprobability', 'precipintensity',
-   'windbearingcos','windbearingsin', 'windspeed','cloudcover',  'pressure', 'is_calmday']
+   'windbearingcos','windbearingsin', 'windspeed','cloudcover',  'pressure', 'is_calmday', 'hour', 'day']
 
-params = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 3,
+params = {'n_estimators': 300, 'max_depth': 6, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
-paramsf = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 3,
+paramsf = {'n_estimators': 300, 'max_depth': 6, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
 paramsg = {'n_estimators': 50, 'max_depth': 4, 'min_samples_split': 3,
           'learning_rate': 0.01, 'loss': 'ls'}
+
+timeSet = range(0,24);
 
 #Ne garde que les données statiques, robuste si des colonnes ont deja ete enlevee
 def getFFeatures(data):
@@ -223,7 +226,7 @@ def getFFeatures(data):
 
 #Ne garde que les doonees dynamiquesrobuste si des colonnes ont deja ete enlevee
 def getGFeatures(data):
-    d = data.drop_duplicates(subset = ['station_id']);
+    d = data.drop_duplicates(subset = gVarSet);
     l = set(gFeatureNames).intersection(d.columns);
     l = list(l)
     return d[l];
@@ -231,28 +234,41 @@ def getGFeatures(data):
 def addRealGtoData(stationTime, data):
     pass;
 
+def getRows(s,t,calmday, data):
+    return (data.station_id == s) & (data.hour == t) & (data.is_calmday == calmday);
+gVarSet = ['station_id', 'hour', 'is_calmday'];
+
 def realGtoG(realg, data):
-    stations = data.drop_duplicates(subset = 'station_id');
+    stations = data.drop_duplicates(subset = gVarSet)
     stations.loc[:,'g'] = realg;
     for s in station_idAll:
-        data.loc[data.station_id == s, 'g'] = stations.loc[stations.station_id == s, 'g'].as_matrix();
+        for t in timeSet:
+            data.loc[getRows(s,t,True, data), 'g'] = stations.loc[getRows(s,t,True, stations), 'g'].as_matrix();
+            data.loc[getRows(s,t,False, data), 'g'] = stations.loc[getRows(s,t,False, stations), 'g'].as_matrix();
     return data.g
 
 def gtoRealG(g, data):
     data.loc[:,'g'] = g;
     for s in station_idAll:
-        data.loc[data.station_id == s, 'g'] = np.mean(data.loc[data.station_id == s, 'g']);
-    stations = data.drop_duplicates(subset = 'station_id')
+        for t in timeSet:
+            data.loc[getRows(s,t,True, data), 'g'] = np.mean(data.loc[getRows(s,t,True, data), 'g']);
+            data.loc[getRows(s,t,False, data), 'g'] = np.mean(data.loc[getRows(s,t,False, data), 'g']);
+    stations = data.drop_duplicates(subset = gVarSet)
     return stations.g
 
 def initG(data):
     for s in station_idAll:
-        data.loc[data.station_id == s, 'g'] = np.max(data.loc[data.station_id == s, 'y']);
+        for t in timeSet:
+            data.loc[getRows(s,t,True, data), 'g'] = np.max(data.loc[getRows(s,t,True, data), 'y']);
+            data.loc[getRows(s,t,False, data), 'g'] = np.max(data.loc[getRows(s,t,False, data), 'y']);
 
 def separation(dataTrainInit, dataTestInit, p, result):
 
-    dataTrain = getPollutant(dataTrainInit, p);
-    dataTest  = getPollutant(dataTestInit, p);
+    dataTrain = addTemporalValues(dataTrainInit);
+    dataTest = addTemporalValues(dataTestInit);
+
+    dataTrain = getPollutant(dataTrain, p);
+    dataTest  = getPollutant(dataTest, p);
 
     idp = getIdPollutant(dataTestInit, p);
 
@@ -269,10 +285,13 @@ def separation(dataTrainInit, dataTestInit, p, result):
 
     print("\n\nSeparation -- Initialised")
 
-    gtrain = dataTrain.g;
+    gtrain = dataTrain.g.as_matrix();
     dtrain = getFFeatures(dataTrain);
+    fFeatureNames = dtrain.columns;
+
     strain = getGFeatures(dataTrain);
-    ytrain = dataTrain.y
+    gFeatureNames = strain.columns;
+    ytrain = dataTrain.y.as_matrix()
     nIter = 5;
     for i in range(nIter):
         f = ensemble.GradientBoostingRegressor(**paramsf)
@@ -293,6 +312,10 @@ def separation(dataTrainInit, dataTestInit, p, result):
         gPredicted = g.predict(strain);
         print("g error : {0}".format(score_function(gPredicted, gRealTrain)))
 
+        if(i == nIter-1):
+            plotFeatureImportance(g, gFeatureNames, showDirect = False, title = 'g features, iter : {0}'.format(i));
+            plotFeatureImportance(f, fFeatureNames, showDirect = False, title = 'f features, iter : {0}'.format(i));
+
         gtrain = realGtoG(gPredicted, dataTrain);
 
 
@@ -303,30 +326,34 @@ def separation(dataTrainInit, dataTestInit, p, result):
     gRealtest = g.predict(stest);
     gtest = realGtoG(gRealtest, dataTest)
 
-
     ftest = f.predict(dtest);
-    print(gtest);
-    print(ftest.head(10))
-
+    print(ftest[ftest <= 0])
     ypTest = gtest - ftest;
     yTest = result.TARGET.as_matrix();
     yTest[idp] = ypTest[:];
 
     return arrayToResult(yTest, dataTestInit)
 
-TestAlgo = True; # TestAlgo = False;
+TestAlgo = True; TestAlgo = False;
 
 if(not TestAlgo):
     dataTrain = loadTrainData(); dataTest = loadTestData()
+
     result = predictGlobal(dataTrain, dataTest);
+
+    result = separation(dataTrain, dataTest, 'NO2', result);
+    saveResult(result, 'separationNo2.csv')
+    result = separation(dataTrain, dataTest, 'PM10', result);
+    result = separation(dataTrain, dataTest, 'PM2_5', result);
+
+    saveResult(result, 'separationTotal.csv');
     #result = predictNO2(dataTrain, dataTest, result);
-    saveResult(result, 'result.csv')
 else:
     data = loadTrainData();
     recenter(data); normalise(data);
     #data = getZone(data, 2);
     stationTest = [1, 4, 5, 6, 16, 26];
-    #stationTest = [20, 22, 23, 25, 28, 11];
+    stationTest = [20, 22, 23, 25, 28, 11];
 
     dataTest = data[data['station_id'].isin(stationTest)];
     dataTest.reset_index(drop = True, inplace = True)
@@ -341,3 +368,8 @@ else:
     getStatLearningTest(result, dataTest);
     result = separation(dataTrain, dataTest, 'NO2', result);
     getStatLearningTest(result, dataTest);
+    result = separation(dataTrain, dataTest, 'PM10', result);
+    getStatLearningTest(result, dataTest);
+    result = separation(dataTrain, dataTest, 'PM2_5', result);
+    getStatLearningTest(result, dataTest);
+    plt.show();

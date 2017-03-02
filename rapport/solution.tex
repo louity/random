@@ -80,15 +80,17 @@ Ce graphique est très instructif, et on voit qu'il confirme nos raisonnements a
 
 Comme prévu, l'algorithme de gradient boosting fonctionne mieux que la régression linéaire, et ses résultats nous encouragent encore plus à séparer les polluants. Nous avons donc appliqué l'algorithme précédent à chaque polluant indépendamment. 
 
-En outre, appliquer tel quel l'algorithme aux données est améliorable.
-\begin{itemize}
-	\item Etant donné l'importance du temps, qui est brut sous sa forme présente, nous avons divisé en plusieurs heure/mois/jour %A completer
-	\item 
-\end{itemize}  
+En outre, étant donné l'importance du temps, qui est brut sous sa forme présente, nous avons divisé ce paramètre en plusieurs hyper-paramètres pertinents a priori : heure/mois/semaine/jour. Ainsi, nous utilisons un maximum les informations a priori sur l'influence des paramètres. Il pourrait aussi sembler utile de diviser également les données par zone, mais nous n'aurions alors plus assez de données statiques différentes pour apprendre (seulement 3).  
 
-Les résultats sont bien meilleurs : 
+Les résultats obtenus sont bien meilleurs : 160 sur les données de validation, et 250 sur les données test. Nous n'avons pas optimisé cette méthode, usant de cross-validation ou autre technique d'ingenieure pour améliorer cette performance, car comme le prouve notre analyse et le benchmark, cela ne nous permettrait pas d'améliorer beaucoup notre score (passer de $15.5^2$ à $14^2$...).
 
-%Afficher graphique feature importance
+\begin{center}
+	\includegraphics[width=0.3\linewidth]{images/NO2.png}
+	\includegraphics[width=0.3\linewidth]{images/PM10.png}
+	\includegraphics[width=0.3\linewidth]{images/PM25.png}
+\end{center}
+
+Les importances des paramètres ne font que confirmer ...
 
 
 \subsubsection{Séparation}
@@ -98,3 +100,23 @@ Jusqu'ici nous n'avons pas encore essayé de palier à la bivalence des données
 De plus, en première approximation, les données statiques et dynamiques jouent des rôles opposés. Les données statiques, purement liées aux activités humaines, régissent la création de polluant, alors que les données météorologiques régissent la dispersion des polluants. Nous pouvons donc modéliser la dépendance des paramètres, en notant $s$ pour statique, $d$ pour dynamique et $t$ pour le temps : $$ p(s,d,t) = g(s,t) - f(d)$$ avec g et f deux fonctions à apprendre. Cela nous permet de séparer les données et ainsi d'apprendre mieux la dépendance statique.
 
 En pratique, n'ayant pas accès à $f$ et $g$, nous apprenons les deux l'un après l'autre. On initialise $g$ par le maximum de polluant observé par station sur la durée donnée. Puis on apprend $f$, qu'on utilise pour apprendre $g$ et ainsi de suite, en espérant une convergence. 
+
+\begin{algorithm}[]
+	\KwData{Données d'entrainement strain, dtrain, ytrain}
+	\KwResult{fonctions f et g}
+	Initialiser $gtrain$ par $gtrain(strain) = \max_{dtrain}(Data(strain,dtrain))$ \;
+	\For{$i = 1$ to $iterationNumber $}{
+		$ftrain \leftarrow gtrain-ytrain$\;
+		Apprendre $f$ avec $f(dtrain) = ftrain$\;
+		$gtrain \leftarrow f(dtrain) + ytrain$\;
+		Apprendre $g$ avec $g(strain) = gtrain$\; 
+		$gtrain \leftarrow g(strain) $\;
+	}
+	\caption{Algorithme d'entrainement de la méthode séparation}
+\end{algorithm}
+
+En pratique l'algorithme converge rapidement, et les résultats sont :
+ - si g(s,t) = g(s)
+ - si g(s,t) = g(s,t)
+ - si g(s,t) = g(s,t,calmday)
+
